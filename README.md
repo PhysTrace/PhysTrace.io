@@ -19,6 +19,8 @@ Deployed with GitHub Pages from the repository root.
   - `build_data.py` — reads scoring results + reconstructions on the server, writes `data.json` and cuts the videos (needs ffmpeg). Server only.
   - `template.html` — page layout, styles and script. Data is injected at `/*DATA*/null`.
   - `build_orig.py` — reads a `figure8_picks` export (trials.csv, results.csv, video/) and writes `orig.json` + `media/orig/` (needs ffmpeg).
+    The annotated violation is looked up in the GT file by each clip's file name (`<attribute>_<group>_Impossible.mp4`), and the video hashes are checked.
+  - `intphys2_gt.csv` — IntPhys2-Timing GT, copied from `PhysTrace/PhysTrace` `IntPhys2Timing/intphys2_gt.csv`.
   - `assemble.py` — puts `data.json` and `orig.json` into the template and writes `index.html`.
 
 ## Rebuild
@@ -26,7 +28,7 @@ Deployed with GitHub Pages from the repository root.
 # 1) (server only) data + videos
 WAN_T=4 COS_T=2 python3 build/build_data.py .
 # 1b) original-video section from a figure8_picks export
-python3 build/build_orig.py ~/Downloads/figure8_picks .
+python3 build/build_orig.py ~/Downloads/figure8_picks . build/intphys2_gt.csv
 # 2) page -> ./index.html
 python3 build/assemble.py .
 # single self-contained file for quick sharing -> ../PhysTrace.io_inline.html

@@ -7,9 +7,12 @@
   {
    "attribute": "continuity",
    "title": "Ball between two balloons",
-   "desc": "Two hot-air balloons drift past each other. The green ball starts in the left basket and ends up in the right one.",
+   "desc": "Two hot-air balloons drift past each other. The green ball goes missing from its basket and shows up in the other balloon's basket.",
    "group": "HotAirBallon_scene114_v2",
-   "gt": null,
+   "gt": [
+    6.17,
+    9.02
+   ],
    "sides": {
     "possible": {
      "video": "media/orig/continuity/possible.mp4",
@@ -97,6 +100,11 @@
      ],
      "lowest": 9,
      "candidates": [
+      3,
+      4,
+      9
+     ],
+     "picks": [
       3,
       4,
       9
@@ -209,6 +217,11 @@
       5,
       7
      ],
+     "picks": [
+      4,
+      5,
+      7
+     ],
      "clips": {
       "4": "media/orig/continuity/impossible_w05.mp4",
       "5": "media/orig/continuity/impossible_w06.mp4",
@@ -236,7 +249,10 @@
    "title": "Ball along the clothesline",
    "desc": "A green ball rolls along the clothesline rail behind the towel and comes out the other side orange.",
    "group": "SphereFallingDown_scene121_v2",
-   "gt": null,
+   "gt": [
+    6.28,
+    8.03
+   ],
    "sides": {
     "possible": {
      "video": "media/orig/immutability/possible.mp4",
@@ -324,6 +340,11 @@
      ],
      "lowest": 5,
      "candidates": [
+      3,
+      5,
+      7
+     ],
+     "picks": [
       3,
       5,
       7
@@ -440,6 +461,11 @@
       5,
       7
      ],
+     "picks": [
+      1,
+      5,
+      7
+     ],
      "clips": {
       "1": "media/orig/immutability/impossible_w02.mp4",
       "5": "media/orig/immutability/impossible_w06.mp4",
@@ -471,7 +497,10 @@
    "title": "Ball in the balloon basket",
    "desc": "A green ball sits in a hot-air balloon basket. The view moves away and back, and the basket is empty.",
    "group": "HotAirBallon_scene105_v1",
-   "gt": null,
+   "gt": [
+    6.22,
+    8.34
+   ],
    "sides": {
     "possible": {
      "video": "media/orig/permanence/possible.mp4",
@@ -559,6 +588,11 @@
      ],
      "lowest": 3,
      "candidates": [
+      2,
+      3,
+      5
+     ],
+     "picks": [
       2,
       3,
       5
@@ -671,6 +705,11 @@
       8,
       9
      ],
+     "picks": [
+      6,
+      8,
+      9
+     ],
      "clips": {
       "6": "media/orig/permanence/impossible_w07.mp4",
       "8": "media/orig/permanence/impossible_w09.mp4",
@@ -698,7 +737,10 @@
    "title": "Cube into the tub",
    "desc": "A wooden board lies in a white tub. A red cube drops into the tub and sinks through the board instead of resting on it.",
    "group": "BoxSoldity_scene4_v1",
-   "gt": null,
+   "gt": [
+    4.68,
+    6.28
+   ],
    "sides": {
     "possible": {
      "video": "media/orig/solidity/possible.mp4",
@@ -786,6 +828,11 @@
      ],
      "lowest": 2,
      "candidates": [
+      1,
+      2,
+      4
+     ],
+     "picks": [
       1,
       2,
       4
@@ -894,6 +941,11 @@
      ],
      "lowest": 3,
      "candidates": [
+      3,
+      5,
+      6
+     ],
+     "picks": [
       3,
       5,
       6
