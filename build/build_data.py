@@ -2,7 +2,7 @@
 """Build data.json + video clips for the PhysTrace qualitative-results page (v1).
 
 Scenes: 4 IntPhys2 Impossible clips. Models: Wan2.1-1.3B (seed-42 trial WAN_T), Cosmos-Predict2-2B 93f
-(seed-42 trial COS_T). Sigmas 0.5 / 0.8. Hit rule = tables.py band rule, k=3, strict edges, GT = videotrace_v2 demo GT.
+(seed-42 trial COS_T). Sigma 0.8. Hit rule = tables.py band rule, k=3, strict edges, GT = videotrace_v2 demo GT.
 
 Outputs under OUT/: data.json, media/<cid>/input.mp4, media/<cid>/<model>_s05.mp4 (full recon),
 media/<cid>/<model>_s05_w04.mp4 (2 s window clips).
@@ -30,7 +30,7 @@ SCENES = [
 ]
 MODELS = [("wan", "Wan2.1-1.3B", f"results_wan_wohint_s42_t{WAN_T}", "demo_sweep/wan"),
           ("cosmos", "Cosmos-Predict2-2B", f"results_cosmos93_wohint_s42_t{COS_T}", "demo_sweep_cosmos93/cosmos20")]
-SIGMAS = [0.5, 0.8]
+SIGMAS = [0.8]
 NPICK = 4
 
 

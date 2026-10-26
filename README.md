@@ -1,6 +1,6 @@
 # PhysTrace project page
 
-Static project page for **PhysTrace** (qualitative results: Wan2.1-1.3B and Cosmos-Predict2-2B at σ 0.5 / 0.8,
+Static project page for **PhysTrace** (qualitative results: Wan2.1-1.3B and Cosmos-Predict2-2B at σ 0.8,
 per-window PE-AV-Large scores, Qwen3-VL prediction/state sentences, 2 s window clips).
 
 Deployed with GitHub Pages from the repository root.
