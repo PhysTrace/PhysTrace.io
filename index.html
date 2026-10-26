@@ -8,7 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one reading column (max 1080px). Scene tabs -> player + 2x2 model/sigma overview -> detail trace -> 2 s window clips. */
+/* Layout: one reading column (max 1080px).
+   Section 1 (reconstructions): scene tabs -> player + model overview -> detail trace -> 2 s window clips.
+   Section 2 (original videos): scene tabs -> Possible / Impossible players -> overlaid trace -> lowest-window clips. */
 :root {
   --bg: #fbfbfa;
   --surface: #ffffff;
@@ -130,6 +132,22 @@ dt em { font-style: normal; letter-spacing: 0; text-transform: none; color: var(
 dt em.diff { color: var(--viol); }
 dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
 .note { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; max-width: 90ch; }
+/* Section 2: original IntPhys2 videos (Possible / Impossible pairs, no generative model). */
+section.orig { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--line); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
+.pair .video { gap: 6px; }
+.pair .player { max-height: none; }
+.player .tag.pos { background: var(--ok); }
+.player .tag.imp { background: var(--viol); }
+.player .min { position: absolute; right: 10px; top: 10px; font: 500 11px var(--f-mono); background: rgba(0, 0, 0, .55); color: #fff; padding: 3px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.timeline .det { position: absolute; top: 4px; height: 14px; background: var(--accent); opacity: .85; border-radius: 2px; }
+.timeline .det.lo { background: var(--viol); opacity: 1; }
+.tab .mins { font: 10.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab .mins b { color: var(--viol); font-weight: 500; }
+.legend .ln { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--accent); vertical-align: middle; }
+.legend .ln.twin { border-top: 2px dashed var(--faint); }
+.twin { font: 11.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 12px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -144,7 +162,7 @@ dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
 
   <section class="qual" id="qual">
     <div class="intro">
-      <div class="eyebrow">Qualitative results · IntPhys2 Impossible clips</div>
+      <div class="eyebrow">Generative reconstructions · IntPhys2 Impossible clips</div>
       <h2>When does the video break physics?</h2>
       <p class="lede">Each clip is noised to <b>σ = 0.8</b> and reconstructed by a video world model. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the reconstruction: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. The three lowest windows (the first window is excluded) form the detected interval around the lowest one. It is a <b>hit</b> when that interval overlaps the annotated violation.</p>
     </div>
@@ -182,6 +200,48 @@ dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
       <div class="chart-big" id="chart"></div>
       <div class="windows" id="windows"></div>
       <p class="note" id="note"></p>
+    </div>
+  </section>
+  <section class="qual orig" id="orig">
+    <div class="intro">
+      <div class="eyebrow">Original videos · IntPhys2 Possible / Impossible pairs</div>
+      <h2>Can it find the violation in a real video?</h2>
+      <p class="lede">No generative model is involved here. PhysTrace runs directly on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation. The pipeline is the same: a <b>2 s window with a 1 s hop</b>, Qwen3-VL-8B-Thinking writes the prediction and the state, and PE-AV-Large scores each window. When the history says an object should be there and the frames disagree, prediction and state split and the score drops. The impossible video falls to a much lower minimum than its possible twin.</p>
+    </div>
+
+    <div class="tabs" role="tablist" id="otabs"></div>
+
+    <div class="pair">
+      <div class="video">
+        <div class="player"><video id="opos" muted loop autoplay playsinline></video><span class="tag pos">Possible</span><span class="min" id="opmin"></span></div>
+        <div class="timeline" id="optl" aria-hidden="true"></div>
+      </div>
+      <div class="video">
+        <div class="player"><video id="oimp" muted loop autoplay playsinline></video><span class="tag imp">Impossible</span><span class="min" id="oimin"></span></div>
+        <div class="timeline" id="oitl" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="desc" id="odesc" style="margin-top:-8px"></p>
+
+    <div class="detail">
+      <div class="detail-hd">
+        <h3 id="odtitle"></h3>
+        <div class="seg" id="osideseg">
+          <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
+          <button type="button" data-side="possible" aria-pressed="false">Possible</button>
+        </div>
+      </div>
+      <span class="verdict" id="overdict"></span>
+      <div class="chart-big" id="ochart"></div>
+      <div class="legend">
+        <span><i class="ln"></i><span id="olsel">impossible video</span></span>
+        <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
+        <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
+        <span><i style="background:var(--viol)"></i>lowest window</span>
+        <span><i style="background:var(--cand)"></i>other lowest windows</span>
+      </div>
+      <div class="windows" id="owindows"></div>
+      <p class="note" id="onote"></p>
     </div>
   </section>
 </div>
@@ -288,11 +348,12 @@ function tick() {
     const p = document.getElementById("playhead");
     if (p) { const W = 760, L = 44, R = 12, X = L + frac * (W - L - R); p.setAttribute("x1", X); p.setAttribute("x2", X); }
   }
+  tickOrig();
   requestAnimationFrame(tick);
 }
 
 document.addEventListener("click", e => {
-  const tab = e.target.closest(".tab"), cell = e.target.closest(".cell"), seg = e.target.closest("#srcseg button");
+  const tab = e.target.closest("#tabs .tab"), cell = e.target.closest(".cell"), seg = e.target.closest("#srcseg button");
   if (tab) { state.scene = +tab.dataset.i; render(); }
   if (cell) { state.model = cell.dataset.m; state.sigma = +cell.dataset.s; state.src = "recon"; render(); }
   if (seg) { state.src = seg.dataset.src; render(); }
@@ -301,4 +362,112 @@ const start = (location.hash || "").slice(1), si = DATA.scenes.findIndex(s => s.
 if (si >= 0) state.scene = si;
 render();
 requestAnimationFrame(tick);
+// ---- Section 2: original videos ----
+const ORIG = {"window_seconds":2.0,"hop_seconds":1.0,"clip_model":"pe-av-large","mllm":"qwen3-vl-thinking","scenes":[{"attribute":"continuity","title":"Ball between two balloons","desc":"Two hot-air balloons drift past each other. The green ball starts in the left basket and ends up in the right one.","group":"HotAirBallon_scene114_v2","sides":{"possible":{"video":"media/orig/continuity/possible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.24859140813350677,"state":"The two hot air balloons float above the sandy desert with a cloudy sky.","prediction":"The two hot air balloons float above the sandy desert with a cloudy sky.","trusted":false},{"start":1.0,"end":3.0,"score":0.20000368356704712,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":2.0,"end":4.0,"score":0.2004477083683014,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":3.0,"end":5.0,"score":0.18350687623023987,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":4.0,"end":6.0,"score":0.18030470609664917,"state":"Two hot air balloons float above the desert sand dunes","prediction":"The small green sphere rests in the left balloon basket","trusted":false},{"start":5.0,"end":7.0,"score":0.19313523173332214,"state":"The small green sphere rests inside the left balloon basket.","prediction":"The small green sphere rests inside the left balloon basket.","trusted":true},{"start":6.0,"end":8.0,"score":0.20098534226417542,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":7.0,"end":9.0,"score":0.20593354105949402,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":8.0,"end":10.0,"score":0.19211417436599731,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true},{"start":9.0,"end":10.6,"score":0.1795753538608551,"state":"The small green sphere rests on the floor inside the left balloon basket.","prediction":"The small green sphere rests on the floor inside the left balloon basket.","trusted":true}],"lowest":9,"candidates":[3,4,9],"clips":{"3":"media/orig/continuity/possible_w04.mp4","4":"media/orig/continuity/possible_w05.mp4","9":"media/orig/continuity/possible_w10.mp4"},"min_score":0.1795753538608551,"untrusted":2,"intervals":[[4.0,6.0],[10.0,10.6]]},"impossible":{"video":"media/orig/continuity/impossible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.22890397906303406,"state":"The green ball rests inside the left basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":true},{"start":1.0,"end":3.0,"score":0.24401061236858368,"state":"The green ball rests inside the left basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":true},{"start":2.0,"end":4.0,"score":0.24153463542461395,"state":"The green ball rests inside the left basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":true},{"start":3.0,"end":5.0,"score":0.22982542216777802,"state":"The green ball rests inside the left basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":true},{"start":4.0,"end":6.0,"score":0.21059373021125793,"state":"The green ball rests inside the left basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":true},{"start":5.0,"end":7.0,"score":0.1171586886048317,"state":"The two hot air balloons float over the desert landscape.","prediction":"The green ball is inside the left basket.","trusted":false},{"start":6.0,"end":8.0,"score":0.2305450141429901,"state":"The green ball rests inside the right basket of the hot air balloon","prediction":"The green ball rests inside the left basket of the hot air balloon","trusted":false},{"start":7.0,"end":9.0,"score":0.18102911114692688,"state":"The green ball rests inside the right basket.","prediction":"The green ball rests inside the left basket.","trusted":false},{"start":8.0,"end":10.0,"score":0.2502499520778656,"state":"The green ball rests inside the right basket of the hot air balloon.","prediction":"The green ball rests inside the right basket of the hot air balloon.","trusted":false},{"start":9.0,"end":10.6,"score":0.26455774903297424,"state":"The green ball rests inside the right basket of the hot air balloon.","prediction":"The green ball rests inside the left basket of the hot air balloon.","trusted":false}],"lowest":5,"candidates":[4,5,7],"clips":{"4":"media/orig/continuity/impossible_w05.mp4","5":"media/orig/continuity/impossible_w06.mp4","7":"media/orig/continuity/impossible_w08.mp4"},"min_score":0.1171586886048317,"untrusted":5,"intervals":[[5.0,7.0],[8.0,9.0]]}},"duration":10.6,"trial":"pe_w2h1_m60_f60_wohint_v2-perm_v2_6to10_s42_t12-1"},{"attribute":"immutability","title":"Ball along the clothesline","desc":"A green ball rolls along the clothesline rail behind the towel and comes out the other side orange.","group":"SphereFallingDown_scene121_v2","sides":{"possible":{"video":"media/orig/immutability/possible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.21711206436157227,"state":"A white towel hangs between wooden poles on a clothesline in the desert.","prediction":"A white towel hangs between wooden poles on a clothesline in the desert.","trusted":true},{"start":1.0,"end":3.0,"score":0.2171735018491745,"state":"The green ball rolls on the clothesline left of the white towel.","prediction":"The green ball rolls on the clothesline left of the white towel.","trusted":true},{"start":2.0,"end":4.0,"score":0.2344333380460739,"state":"The green ball sits on the clothesline left of the white towel.","prediction":"The green ball sits on the clothesline left of the white towel.","trusted":true},{"start":3.0,"end":5.0,"score":0.18555814027786255,"state":"The white towel hangs between wooden poles on a clothesline in the desert","prediction":"The white towel hangs between wooden poles on a clothesline in the desert","trusted":false},{"start":4.0,"end":6.0,"score":0.2226378619670868,"state":"The green ball rolls on the clothesline left of the white towel.","prediction":"The green ball rolls on the clothesline left of the white towel.","trusted":true},{"start":5.0,"end":7.0,"score":0.17279838025569916,"state":"The green ball rolls on the clothesline left of the white towel.","prediction":"The green ball rolls on the clothesline left of the white towel.","trusted":true},{"start":6.0,"end":8.0,"score":0.21305936574935913,"state":"The green ball rolls on the clothesline left of the white towel.","prediction":"The green ball rolls on the clothesline left of the white towel.","trusted":true},{"start":7.0,"end":9.0,"score":0.2044050246477127,"state":"The green ball sits on the clothesline right of the white towel.","prediction":"The green ball sits on the clothesline right of the white towel.","trusted":true},{"start":8.0,"end":10.0,"score":0.2874258756637573,"state":"A white towel hangs between wooden poles on a clothesline in the desert with a rainbow, palm trees in the background, and a dark object below.","prediction":"A white towel hangs between wooden poles on a clothesline in the desert with a rainbow, palm trees in the background, and a dark object below.","trusted":false},{"start":9.0,"end":10.6,"score":0.25664380192756653,"state":"A white towel hangs between wooden poles on a clothesline in the desert.","prediction":"A white towel hangs between wooden poles on a clothesline in the desert.","trusted":false}],"lowest":5,"candidates":[3,5,7],"clips":{"3":"media/orig/immutability/possible_w04.mp4","5":"media/orig/immutability/possible_w06.mp4","7":"media/orig/immutability/possible_w08.mp4"},"min_score":0.17279838025569916,"untrusted":3,"intervals":[[4.0,5.0],[6.0,7.0],[8.0,9.0]]},"impossible":{"video":"media/orig/immutability/impossible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.25504687428474426,"state":"The desert scene features a rainbow, palm trees, and a white towel on a clothesline.","prediction":"The desert scene features a rainbow, palm trees, and a white towel on a clothesline.","trusted":false},{"start":1.0,"end":3.0,"score":0.23164115846157074,"state":"The green ball rolls along the ground left of the clothesline pole.","prediction":"The green ball rolls along the ground left of the clothesline pole.","trusted":true},{"start":2.0,"end":4.0,"score":0.2991296648979187,"state":"The green ball sits left on the clothesline pole in the desert scene.","prediction":"The green ball sits left on the clothesline pole in the desert scene.","trusted":true},{"start":3.0,"end":5.0,"score":0.2627079486846924,"state":"The green ball rolls along the clothesline pole left of the pink towel.","prediction":"The green ball rolls along the clothesline pole left of the pink towel.","trusted":true},{"start":4.0,"end":6.0,"score":0.25441911816596985,"state":"The green ball rolls along the clothesline pole left of the pink towel.","prediction":"The green ball rolls along the clothesline pole left of the pink towel.","trusted":true},{"start":5.0,"end":7.0,"score":0.08890004456043243,"state":"The yellow ball sits right of the clothesline pole in the desert scene.","prediction":"The green ball sits right there, fully visible.","trusted":false},{"start":6.0,"end":8.0,"score":0.2503797709941864,"state":"The pink towel hangs between two clothesline poles in the desert scene.","prediction":"The pink towel hangs between two clothesline poles in the desert scene.","trusted":false},{"start":7.0,"end":9.0,"score":0.20733994245529175,"state":"The orange ball sits right there on the clothesline pole left of the pink towel.","prediction":"The orange ball sits right there on the clothesline pole left of the pink towel.","trusted":false},{"start":8.0,"end":10.0,"score":0.2803860306739807,"state":"A pink towel hangs between two clothesline poles in the desert scene.","prediction":"A pink towel hangs between two clothesline poles in the desert scene.","trusted":true},{"start":9.0,"end":10.6,"score":0.280485600233078,"state":"A pink towel hangs between two clothesline poles in the desert scene.","prediction":"A pink towel hangs between two clothesline poles in the desert scene.","trusted":false}],"lowest":5,"candidates":[1,5,7],"clips":{"1":"media/orig/immutability/impossible_w02.mp4","5":"media/orig/immutability/impossible_w06.mp4","7":"media/orig/immutability/impossible_w08.mp4"},"min_score":0.08890004456043243,"untrusted":5,"intervals":[[2.0,3.0],[6.0,7.0],[8.0,9.0]]}},"duration":10.6,"trial":"pe_w2h1_m60_f60_wohint_v2-perm_v2_6to10_s42_t12-2"},{"attribute":"permanence","title":"Ball in the balloon basket","desc":"A green ball sits in a hot-air balloon basket. The view moves away and back, and the basket is empty.","group":"HotAirBallon_scene105_v1","sides":{"possible":{"video":"media/orig/permanence/possible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.25929227471351624,"state":"The green ball rests inside the hot air balloon basket on the gray ground.","prediction":"The green ball rests inside the hot air balloon basket on the gray ground.","trusted":true},{"start":1.0,"end":3.0,"score":0.22395379841327667,"state":"The green ball rests inside the hot air balloon basket on the gray ground.","prediction":"The green ball rests inside the hot air balloon basket on the gray ground.","trusted":true},{"start":2.0,"end":4.0,"score":0.19139689207077026,"state":"The green ball rests inside the hot air balloon basket on the gray ground.","prediction":"The green ball rests inside the hot air balloon basket on the gray ground.","trusted":true},{"start":3.0,"end":5.0,"score":0.17200280725955963,"state":"The green ball rests inside the hot air balloon basket on the gray ground.","prediction":"The green ball rests inside the hot air balloon basket on the gray ground.","trusted":true},{"start":4.0,"end":6.0,"score":0.26150277256965637,"state":"The hot air balloon basket casts a shadow on the white ground.","prediction":"The hot air balloon basket casts a shadow on the white ground.","trusted":false},{"start":5.0,"end":7.0,"score":0.1838282346725464,"state":"The green ball rests inside the hot air balloon basket on the gray ground","prediction":"The green ball rests inside the hot air balloon basket on the gray ground","trusted":true},{"start":6.0,"end":8.0,"score":0.21595978736877441,"state":"The hot air balloon basket rests on the white ground with a shadow.","prediction":"The hot air balloon basket rests on the white ground with a shadow.","trusted":true},{"start":7.0,"end":9.0,"score":0.2379692792892456,"state":"The green ball rests inside the hot air balloon basket on the white ground.","prediction":"The green ball rests inside the hot air balloon basket on the white ground.","trusted":true},{"start":8.0,"end":10.0,"score":0.25984737277030945,"state":"The green ball rests inside the hot air balloon basket on the white ground.","prediction":"The green ball rests inside the hot air balloon basket on the white ground.","trusted":true},{"start":9.0,"end":10.6,"score":0.25568652153015137,"state":"The green ball rests inside the hot air balloon basket on the white ground.","prediction":"The green ball rests inside the hot air balloon basket on the white ground.","trusted":true}],"lowest":3,"candidates":[2,3,5],"clips":{"2":"media/orig/permanence/possible_w03.mp4","3":"media/orig/permanence/possible_w04.mp4","5":"media/orig/permanence/possible_w06.mp4"},"min_score":0.17200280725955963,"untrusted":1,"intervals":[[3.0,5.0],[6.0,7.0]]},"impossible":{"video":"media/orig/permanence/impossible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.26270344853401184,"state":"The green ball sits inside the basket under the striped hot air balloon.","prediction":"The green ball sits inside the basket under the striped hot air balloon.","trusted":true},{"start":1.0,"end":3.0,"score":0.2328035831451416,"state":"The green ball sits inside the basket under the striped hot air balloon.","prediction":"The green ball sits inside the basket under the striped hot air balloon.","trusted":true},{"start":2.0,"end":4.0,"score":0.1291666179895401,"state":"The basket under the striped hot air balloon is visible, empty inside; the green ball is absent from inside the basket.","prediction":"The green ball lies right there, fully visible inside the basket.","trusted":false},{"start":3.0,"end":5.0,"score":0.22274568676948547,"state":"The striped hot air balloon floats above the white ground with a dark shadow.","prediction":"The striped hot air balloon floats above the white ground with a dark shadow.","trusted":false},{"start":4.0,"end":6.0,"score":0.2873935103416443,"state":"The hot air balloon basket hangs above the ground with a shadow beneath it.","prediction":"The hot air balloon basket hangs above the ground with a shadow beneath it.","trusted":false},{"start":5.0,"end":7.0,"score":0.2694191336631775,"state":"The hot air balloon basket hangs above the white ground with its shadow.","prediction":"The hot air balloon basket hangs above the white ground with its shadow.","trusted":true},{"start":6.0,"end":8.0,"score":0.0241840872913599,"state":"The hot air balloon basket rests on the white ground with its shadow.","prediction":"The green ball lies right there.","trusted":false},{"start":7.0,"end":9.0,"score":0.26302626729011536,"state":"The hot air balloon basket with red cushions hangs above the white ground.","prediction":"The hot air balloon basket with red cushions hangs above the white ground.","trusted":false},{"start":8.0,"end":10.0,"score":0.0365203320980072,"state":"The hot air balloon basket hangs above the white ground with its shadow; the green ball is absent from inside the basket","prediction":"The green ball lies right there.","trusted":false},{"start":9.0,"end":10.6,"score":0.06162136793136597,"state":"The striped hot air balloon basket hangs above the white ground with its shadow.","prediction":"The green ball sits right there in the basket.","trusted":false}],"lowest":6,"candidates":[6,8,9],"clips":{"6":"media/orig/permanence/impossible_w07.mp4","8":"media/orig/permanence/impossible_w09.mp4","9":"media/orig/permanence/impossible_w10.mp4"},"min_score":0.0241840872913599,"untrusted":7,"intervals":[[7.0,8.0],[9.0,10.6]]}},"duration":10.6,"trial":"pe_w2h1_m60_f60_wohint_v2-perm_v2_6to10_s42_t12-4"},{"attribute":"solidity","title":"Cube into the tub","desc":"A wooden board lies in a white tub. A red cube drops into the tub and sinks through the board instead of resting on it.","group":"BoxSoldity_scene4_v1","sides":{"possible":{"video":"media/orig/solidity/possible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.23395030200481415,"state":"The light brown wooden square block rests on the white tub with blue interior, and the dark blue hexagonal object is in the top-left background.","prediction":"The light brown wooden square block rests on the white tub with blue interior, and the dark blue hexagonal object is in the top-left background.","trusted":true},{"start":1.0,"end":3.0,"score":0.21746250987052917,"state":"The light brown wooden square block rests on the white tub with blue interior, and the dark blue hexagonal object is in the top-left background.","prediction":"The light brown wooden square block rests on the white tub with blue interior, and the dark blue hexagonal object is in the top-left background.","trusted":true},{"start":2.0,"end":4.0,"score":0.2061750888824463,"state":"The light brown wooden square block rests on the bottom of the white tub with blue interior.","prediction":"The light brown wooden square block rests on the bottom of the white tub with blue interior.","trusted":true},{"start":3.0,"end":5.0,"score":0.23130404949188232,"state":"The white tub with blue interior holds the red cube inside.","prediction":"The white tub with blue interior holds the red cube inside.","trusted":true},{"start":4.0,"end":6.0,"score":0.21922370791435242,"state":"The white tub with blue interior holds the red cube resting inside it, and the black object sits in the bottom left corner of the tub.","prediction":"The white tub with blue interior holds the red cube resting inside it, and the black object sits in the bottom left corner of the tub.","trusted":true},{"start":5.0,"end":7.0,"score":0.27936476469039917,"state":"The white tub with blue interior holds the red cube inside, and the black object sits in the bottom left corner of the tub.","prediction":"The white tub with blue interior holds the red cube inside, and the black object sits in the bottom left corner of the tub.","trusted":true},{"start":6.0,"end":8.0,"score":0.2773805856704712,"state":"The white tub with blue interior holds the red cube inside, and the black object sits in the bottom left corner of the tub.","prediction":"The white tub with blue interior holds the red cube inside, and the black object sits in the bottom left corner of the tub.","trusted":true},{"start":7.0,"end":9.0,"score":0.27297085523605347,"state":"The red cube rests inside the white tub with blue interior, and the black object sits in the bottom left corner of the tub.","prediction":"The red cube rests inside the white tub with blue interior, and the black object sits in the bottom left corner of the tub.","trusted":true},{"start":8.0,"end":10.0,"score":0.2726929187774658,"state":"The red cube rests inside the white tub with blue interior, and the black object sits in the bottom left corner of the tub.","prediction":"The red cube rests inside the white tub with blue interior, and the black object sits in the bottom left corner of the tub.","trusted":true},{"start":9.0,"end":10.6,"score":0.273822546005249,"state":"The red cube rests inside the white tub with blue interior, and the small black object sits in the bottom left corner of the tub.","prediction":"The red cube rests inside the white tub with blue interior, and the small black object sits in the bottom left corner of the tub.","trusted":true}],"lowest":2,"candidates":[1,2,4],"clips":{"1":"media/orig/solidity/possible_w02.mp4","2":"media/orig/solidity/possible_w03.mp4","4":"media/orig/solidity/possible_w05.mp4"},"min_score":0.2061750888824463,"untrusted":0,"intervals":[[2.0,4.0],[5.0,6.0]]},"impossible":{"video":"media/orig/solidity/impossible.mp4","windows":[{"start":0.0,"end":2.0,"score":0.23520220816135406,"state":"The light brown wooden board rests inside the white basin.","prediction":"The light brown wooden board rests inside the white basin.","trusted":true},{"start":1.0,"end":3.0,"score":0.23682472109794617,"state":"The white basin rests on the blue sea surface.","prediction":"The white basin rests on the blue sea surface.","trusted":false},{"start":2.0,"end":4.0,"score":0.24668142199516296,"state":"The white basin rests on the checkered surface against the blue ocean sky.","prediction":"The white basin rests on the checkered surface against the blue ocean sky.","trusted":true},{"start":3.0,"end":5.0,"score":0.10692194104194641,"state":"The white basin rests on the checkered surface against the blue ocean sky.","prediction":"The red cube rests on top of the wooden board.","trusted":false},{"start":4.0,"end":6.0,"score":0.20344647765159607,"state":"The white basin rests on the checkered surface against the blue ocean sky.","prediction":"The red block rests inside the white basin.","trusted":false},{"start":5.0,"end":7.0,"score":0.13892430067062378,"state":"The white basin rests on the checkered surface.","prediction":"The light brown wooden board rests inside the white basin.","trusted":false},{"start":6.0,"end":8.0,"score":0.12026888132095337,"state":"The white basin rests on the checkered surface below the blue ocean sky.","prediction":"The small black object rests inside the white basin.","trusted":false},{"start":7.0,"end":9.0,"score":0.21110138297080994,"state":"The white basin rests on the checkered surface with the blue ocean sky in the background","prediction":"The white basin rests on the checkered surface with the blue ocean sky in the background","trusted":true},{"start":8.0,"end":10.0,"score":0.22506660223007202,"state":"The white basin rests on the checkered surface with the blue ocean sky in the background.","prediction":"The white basin rests on the checkered surface with the blue ocean sky in the background.","trusted":true},{"start":9.0,"end":10.6,"score":0.17262279987335205,"state":"The white basin rests on the checkered surface with the black object inside.","prediction":"The white basin rests on the checkered surface with the black object inside.","trusted":true}],"lowest":3,"candidates":[3,5,6],"clips":{"3":"media/orig/solidity/impossible_w04.mp4","5":"media/orig/solidity/impossible_w06.mp4","6":"media/orig/solidity/impossible_w07.mp4"},"min_score":0.10692194104194641,"untrusted":5,"intervals":[[4.0,5.0],[6.0,8.0]]}},"duration":10.6,"trial":"pe_w2h1_m60_f60_wohint_v2-perm_v2_6to10_s42_t12-4"}]};
+const ostate = { scene: 0, side: "impossible" };
+const OTHER = { impossible: "possible", possible: "impossible" };
+const OW = 760, OL = 44, OR = 12;
+
+function ochartSVG(sc) {
+  const T = sc.duration, W = OW, H = 250, L = OL, R = OR, Tp = 16, B = 46;
+  const sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
+  const vals = [...sel.windows, ...twin.windows].map(w => w.score);
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .12 || .02; lo -= pad; hi += pad;
+  const x = t => L + (t / T) * (W - L - R), y = v => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
+  const mono = 'font-family="IBM Plex Mono, monospace"', cx = w => x((w.start + Math.min(w.end, T)) / 2);
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Window scores of the possible and impossible videos">`;
+  for (let k = 0; k <= 3; k++) {
+    const v = lo + (hi - lo) * k / 3;
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+    g += `<text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="11" ${mono} fill="var(--muted)">${v.toFixed(2)}</text>`;
+  }
+  const by = H - B + 8;
+  sel.intervals.forEach(([a, b]) => g += `<rect x="${x(a)}" y="${by}" width="${Math.max(2, x(b) - x(a))}" height="6" rx="1.5" fill="var(--accent)"/>`);
+  for (let t = 0; t <= Math.floor(T); t++)
+    g += `<text x="${x(t)}" y="${H - B + 30}" text-anchor="middle" font-size="11" ${mono} fill="var(--muted)">${t}s</text>`;
+  g += `<text x="${L}" y="${Tp - 4}" font-size="10.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">window score (PE-AV-Large)</text>`;
+  g += `<polyline points="${twin.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--faint)" stroke-width="1.6" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+  twin.windows.forEach(w => g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="2.4" fill="var(--faint)"/>`);
+  g += `<polyline points="${sel.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  sel.windows.forEach((w, i) => {
+    let fill = "var(--accent)", r = 3.5;
+    if (sel.candidates.includes(i)) { fill = "var(--cand)"; r = 5; }
+    if (i === sel.lowest) { fill = "var(--viol)"; r = 6.5; }
+    g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="${r}" fill="${fill}" stroke="var(--surface)" stroke-width="1.3"/>`;
+    if (sel.candidates.includes(i))
+      g += `<text x="${cx(w)}" y="${y(w.score) - 11}" text-anchor="middle" font-size="10.5" font-weight="600" ${mono} fill="var(--ink)">W${i + 1}</text>`;
+  });
+  g += `<line id="oplayhead" x1="${L}" x2="${L}" y1="${Tp}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" opacity=".5"/>`;
+  return g + "</svg>";
+}
+
+function otimeline(sc, side) {
+  const s = sc.sides[side], T = sc.duration;
+  return s.candidates.map(i => {
+    const a = i + 1, b = Math.min(i + 2, T);  // each window adds its last 1 s to the detected interval
+    return `<div class="det ${i === s.lowest ? "lo" : ""}" style="left:${a / T * 100}%;width:${(b - a) / T * 100}%"></div>`;
+  }).join("") + `<div class="head" style="left:0"></div>`;
+}
+
+function renderOrig() {
+  if (!ORIG) { $("orig").hidden = true; return; }
+  const sc = ORIG.scenes[ostate.scene], sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
+  $("otabs").innerHTML = ORIG.scenes.map((s, i) => `<button class="tab" role="tab" aria-selected="${i === ostate.scene}" data-oi="${i}">
+      <span class="attr">${s.attribute}</span><span class="ttl">${esc(s.title)}</span>
+      <span class="mins">min <b>${s.sides.impossible.min_score.toFixed(3)}</b> impossible · ${s.sides.possible.min_score.toFixed(3)} possible</span></button>`).join("");
+  for (const [id, side] of [["opos", "possible"], ["oimp", "impossible"]]) {
+    const v = $(id), src = sc.sides[side].video;
+    if (v.getAttribute("src") !== src) { v.setAttribute("src", src); v.play?.().catch(() => {}); }
+  }
+  $("opmin").textContent = `min ${sc.sides.possible.min_score.toFixed(3)}`;
+  $("oimin").textContent = `min ${sc.sides.impossible.min_score.toFixed(3)}`;
+  $("optl").innerHTML = otimeline(sc, "possible");
+  $("oitl").innerHTML = otimeline(sc, "impossible");
+  $("odesc").innerHTML = `${esc(sc.desc)} <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
+
+  for (const b of $("osideseg").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.side === ostate.side);
+  const label = ostate.side === "impossible" ? "Impossible" : "Possible";
+  $("odtitle").textContent = `${label} video, ${sc.attribute}`;
+  const lw = sel.windows[sel.lowest];
+  $("overdict").textContent = `lowest window W${sel.lowest + 1} (${f2(lw.start)}–${f2(Math.min(lw.end, sc.duration))} s, ${lw.score.toFixed(3)}) · ` +
+    `minimum ${sel.min_score.toFixed(3)} vs. ${twin.min_score.toFixed(3)} in the ${OTHER[ostate.side]} twin · ` +
+    `detected ${sel.intervals.map(([a, b]) => `${f2(a)}–${f2(b)} s`).join(", ")}`;
+  $("olsel").textContent = `${ostate.side} video`;
+  $("oltwin").textContent = `${OTHER[ostate.side]} twin`;
+  $("ochart").innerHTML = ochartSVG(sc);
+  $("owindows").innerHTML = sel.candidates.map(i => {
+    const w = sel.windows[i], isLo = i === sel.lowest, same = w.prediction.trim() === w.state.trim(), tw = twin.windows[i];
+    const end = Math.min(w.end, sc.duration);
+    return `<article class="wcard ${isLo ? "lo in" : ""}">
+      <div class="clip"><video src="${sel.clips[i]}" muted loop autoplay playsinline preload="auto" aria-label="Window ${i + 1} clip"></video>
+        <span class="badge">W${i + 1} · ${f2(w.start)}–${f2(end)} s</span>${isLo ? `<span class="role lo">lowest</span>` : ""}</div>
+      <div class="wmeta"><b>W${i + 1}</b><span class="score">score ${w.score.toFixed(3)}</span></div>
+      ${tw ? `<div class="twin">${OTHER[ostate.side]} twin, same window: ${tw.score.toFixed(3)}</div>` : ""}
+      <dl><div><dt>Prediction</dt><dd>${esc(w.prediction)}</dd></div>
+          <div><dt>State <em class="${same ? "" : "diff"}">${same ? "same as prediction" : "differs from prediction"}</em></dt><dd>${esc(w.state)}</dd></div></dl>
+    </article>`;
+  }).join("");
+  $("onote").textContent = `Original IntPhys2 videos (60 fps, ${sc.duration} s), shown here at 256 px and 30 fps. ` +
+    `Scores and sentences come from a single seed-42 run per pair (${sc.trial}). Qwen3-VL-8B-Thinking sees 60 frames per window. ` +
+    `The three lowest windows form the detected interval; each adds its last 1 s. Window clips loop the exact 2 s span that was scored.`;
+}
+
+function tickOrig() {
+  if (!ORIG) return;
+  const a = $("opos"), b = $("oimp"), sc = ORIG.scenes[ostate.scene];
+  if (a.duration && b.duration && Math.abs(a.currentTime - b.currentTime) > 0.15) b.currentTime = a.currentTime;
+  if (a.duration) {
+    const frac = Math.min(1, a.currentTime / a.duration);
+    for (const h of document.querySelectorAll("#optl .head, #oitl .head")) h.style.left = `calc(${frac * 100}% - 1px)`;
+    const p = document.getElementById("oplayhead");
+    if (p) { const X = OL + frac * (OW - OL - OR); p.setAttribute("x1", X); p.setAttribute("x2", X); }
+  }
+}
+
+document.addEventListener("click", e => {
+  const tab = e.target.closest("[data-oi]"), side = e.target.closest("#osideseg button");
+  if (tab) { ostate.scene = +tab.dataset.oi; renderOrig(); }
+  if (side) { ostate.side = side.dataset.side; renderOrig(); }
+});
+renderOrig();
 </script>

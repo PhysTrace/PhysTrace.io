@@ -8,7 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one reading column (max 1080px). Scene tabs -> player + 2x2 model/sigma overview -> detail trace -> 2 s window clips. */
+/* Layout: one reading column (max 1080px).
+   Section 1 (reconstructions): scene tabs -> player + model overview -> detail trace -> 2 s window clips.
+   Section 2 (original videos): scene tabs -> Possible / Impossible players -> overlaid trace -> lowest-window clips. */
 :root {
   --bg: #fbfbfa;
   --surface: #ffffff;
@@ -130,6 +132,22 @@ dt em { font-style: normal; letter-spacing: 0; text-transform: none; color: var(
 dt em.diff { color: var(--viol); }
 dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
 .note { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; max-width: 90ch; }
+/* Section 2: original IntPhys2 videos (Possible / Impossible pairs, no generative model). */
+section.orig { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--line); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
+.pair .video { gap: 6px; }
+.pair .player { max-height: none; }
+.player .tag.pos { background: var(--ok); }
+.player .tag.imp { background: var(--viol); }
+.player .min { position: absolute; right: 10px; top: 10px; font: 500 11px var(--f-mono); background: rgba(0, 0, 0, .55); color: #fff; padding: 3px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.timeline .det { position: absolute; top: 4px; height: 14px; background: var(--accent); opacity: .85; border-radius: 2px; }
+.timeline .det.lo { background: var(--viol); opacity: 1; }
+.tab .mins { font: 10.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab .mins b { color: var(--viol); font-weight: 500; }
+.legend .ln { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--accent); vertical-align: middle; }
+.legend .ln.twin { border-top: 2px dashed var(--faint); }
+.twin { font: 11.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 12px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -144,7 +162,7 @@ dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
 
   <section class="qual" id="qual">
     <div class="intro">
-      <div class="eyebrow">Qualitative results · IntPhys2 Impossible clips</div>
+      <div class="eyebrow">Generative reconstructions · IntPhys2 Impossible clips</div>
       <h2>When does the video break physics?</h2>
       <p class="lede">Each clip is noised to <b>σ = 0.8</b> and reconstructed by a video world model. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the reconstruction: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. The three lowest windows (the first window is excluded) form the detected interval around the lowest one. It is a <b>hit</b> when that interval overlaps the annotated violation.</p>
     </div>
@@ -182,6 +200,48 @@ dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
       <div class="chart-big" id="chart"></div>
       <div class="windows" id="windows"></div>
       <p class="note" id="note"></p>
+    </div>
+  </section>
+  <section class="qual orig" id="orig">
+    <div class="intro">
+      <div class="eyebrow">Original videos · IntPhys2 Possible / Impossible pairs</div>
+      <h2>Can it find the violation in a real video?</h2>
+      <p class="lede">No generative model is involved here. PhysTrace runs directly on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation. The pipeline is the same: a <b>2 s window with a 1 s hop</b>, Qwen3-VL-8B-Thinking writes the prediction and the state, and PE-AV-Large scores each window. When the history says an object should be there and the frames disagree, prediction and state split and the score drops. The impossible video falls to a much lower minimum than its possible twin.</p>
+    </div>
+
+    <div class="tabs" role="tablist" id="otabs"></div>
+
+    <div class="pair">
+      <div class="video">
+        <div class="player"><video id="opos" muted loop autoplay playsinline></video><span class="tag pos">Possible</span><span class="min" id="opmin"></span></div>
+        <div class="timeline" id="optl" aria-hidden="true"></div>
+      </div>
+      <div class="video">
+        <div class="player"><video id="oimp" muted loop autoplay playsinline></video><span class="tag imp">Impossible</span><span class="min" id="oimin"></span></div>
+        <div class="timeline" id="oitl" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="desc" id="odesc" style="margin-top:-8px"></p>
+
+    <div class="detail">
+      <div class="detail-hd">
+        <h3 id="odtitle"></h3>
+        <div class="seg" id="osideseg">
+          <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
+          <button type="button" data-side="possible" aria-pressed="false">Possible</button>
+        </div>
+      </div>
+      <span class="verdict" id="overdict"></span>
+      <div class="chart-big" id="ochart"></div>
+      <div class="legend">
+        <span><i class="ln"></i><span id="olsel">impossible video</span></span>
+        <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
+        <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
+        <span><i style="background:var(--viol)"></i>lowest window</span>
+        <span><i style="background:var(--cand)"></i>other lowest windows</span>
+      </div>
+      <div class="windows" id="owindows"></div>
+      <p class="note" id="onote"></p>
     </div>
   </section>
 </div>
@@ -288,11 +348,12 @@ function tick() {
     const p = document.getElementById("playhead");
     if (p) { const W = 760, L = 44, R = 12, X = L + frac * (W - L - R); p.setAttribute("x1", X); p.setAttribute("x2", X); }
   }
+  tickOrig();
   requestAnimationFrame(tick);
 }
 
 document.addEventListener("click", e => {
-  const tab = e.target.closest(".tab"), cell = e.target.closest(".cell"), seg = e.target.closest("#srcseg button");
+  const tab = e.target.closest("#tabs .tab"), cell = e.target.closest(".cell"), seg = e.target.closest("#srcseg button");
   if (tab) { state.scene = +tab.dataset.i; render(); }
   if (cell) { state.model = cell.dataset.m; state.sigma = +cell.dataset.s; state.src = "recon"; render(); }
   if (seg) { state.src = seg.dataset.src; render(); }
@@ -301,4 +362,112 @@ const start = (location.hash || "").slice(1), si = DATA.scenes.findIndex(s => s.
 if (si >= 0) state.scene = si;
 render();
 requestAnimationFrame(tick);
+// ---- Section 2: original videos ----
+const ORIG = /*ORIG*/null;
+const ostate = { scene: 0, side: "impossible" };
+const OTHER = { impossible: "possible", possible: "impossible" };
+const OW = 760, OL = 44, OR = 12;
+
+function ochartSVG(sc) {
+  const T = sc.duration, W = OW, H = 250, L = OL, R = OR, Tp = 16, B = 46;
+  const sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
+  const vals = [...sel.windows, ...twin.windows].map(w => w.score);
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .12 || .02; lo -= pad; hi += pad;
+  const x = t => L + (t / T) * (W - L - R), y = v => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
+  const mono = 'font-family="IBM Plex Mono, monospace"', cx = w => x((w.start + Math.min(w.end, T)) / 2);
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Window scores of the possible and impossible videos">`;
+  for (let k = 0; k <= 3; k++) {
+    const v = lo + (hi - lo) * k / 3;
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+    g += `<text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="11" ${mono} fill="var(--muted)">${v.toFixed(2)}</text>`;
+  }
+  const by = H - B + 8;
+  sel.intervals.forEach(([a, b]) => g += `<rect x="${x(a)}" y="${by}" width="${Math.max(2, x(b) - x(a))}" height="6" rx="1.5" fill="var(--accent)"/>`);
+  for (let t = 0; t <= Math.floor(T); t++)
+    g += `<text x="${x(t)}" y="${H - B + 30}" text-anchor="middle" font-size="11" ${mono} fill="var(--muted)">${t}s</text>`;
+  g += `<text x="${L}" y="${Tp - 4}" font-size="10.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">window score (PE-AV-Large)</text>`;
+  g += `<polyline points="${twin.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--faint)" stroke-width="1.6" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+  twin.windows.forEach(w => g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="2.4" fill="var(--faint)"/>`);
+  g += `<polyline points="${sel.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  sel.windows.forEach((w, i) => {
+    let fill = "var(--accent)", r = 3.5;
+    if (sel.candidates.includes(i)) { fill = "var(--cand)"; r = 5; }
+    if (i === sel.lowest) { fill = "var(--viol)"; r = 6.5; }
+    g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="${r}" fill="${fill}" stroke="var(--surface)" stroke-width="1.3"/>`;
+    if (sel.candidates.includes(i))
+      g += `<text x="${cx(w)}" y="${y(w.score) - 11}" text-anchor="middle" font-size="10.5" font-weight="600" ${mono} fill="var(--ink)">W${i + 1}</text>`;
+  });
+  g += `<line id="oplayhead" x1="${L}" x2="${L}" y1="${Tp}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" opacity=".5"/>`;
+  return g + "</svg>";
+}
+
+function otimeline(sc, side) {
+  const s = sc.sides[side], T = sc.duration;
+  return s.candidates.map(i => {
+    const a = i + 1, b = Math.min(i + 2, T);  // each window adds its last 1 s to the detected interval
+    return `<div class="det ${i === s.lowest ? "lo" : ""}" style="left:${a / T * 100}%;width:${(b - a) / T * 100}%"></div>`;
+  }).join("") + `<div class="head" style="left:0"></div>`;
+}
+
+function renderOrig() {
+  if (!ORIG) { $("orig").hidden = true; return; }
+  const sc = ORIG.scenes[ostate.scene], sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
+  $("otabs").innerHTML = ORIG.scenes.map((s, i) => `<button class="tab" role="tab" aria-selected="${i === ostate.scene}" data-oi="${i}">
+      <span class="attr">${s.attribute}</span><span class="ttl">${esc(s.title)}</span>
+      <span class="mins">min <b>${s.sides.impossible.min_score.toFixed(3)}</b> impossible · ${s.sides.possible.min_score.toFixed(3)} possible</span></button>`).join("");
+  for (const [id, side] of [["opos", "possible"], ["oimp", "impossible"]]) {
+    const v = $(id), src = sc.sides[side].video;
+    if (v.getAttribute("src") !== src) { v.setAttribute("src", src); v.play?.().catch(() => {}); }
+  }
+  $("opmin").textContent = `min ${sc.sides.possible.min_score.toFixed(3)}`;
+  $("oimin").textContent = `min ${sc.sides.impossible.min_score.toFixed(3)}`;
+  $("optl").innerHTML = otimeline(sc, "possible");
+  $("oitl").innerHTML = otimeline(sc, "impossible");
+  $("odesc").innerHTML = `${esc(sc.desc)} <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
+
+  for (const b of $("osideseg").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.side === ostate.side);
+  const label = ostate.side === "impossible" ? "Impossible" : "Possible";
+  $("odtitle").textContent = `${label} video, ${sc.attribute}`;
+  const lw = sel.windows[sel.lowest];
+  $("overdict").textContent = `lowest window W${sel.lowest + 1} (${f2(lw.start)}–${f2(Math.min(lw.end, sc.duration))} s, ${lw.score.toFixed(3)}) · ` +
+    `minimum ${sel.min_score.toFixed(3)} vs. ${twin.min_score.toFixed(3)} in the ${OTHER[ostate.side]} twin · ` +
+    `detected ${sel.intervals.map(([a, b]) => `${f2(a)}–${f2(b)} s`).join(", ")}`;
+  $("olsel").textContent = `${ostate.side} video`;
+  $("oltwin").textContent = `${OTHER[ostate.side]} twin`;
+  $("ochart").innerHTML = ochartSVG(sc);
+  $("owindows").innerHTML = sel.candidates.map(i => {
+    const w = sel.windows[i], isLo = i === sel.lowest, same = w.prediction.trim() === w.state.trim(), tw = twin.windows[i];
+    const end = Math.min(w.end, sc.duration);
+    return `<article class="wcard ${isLo ? "lo in" : ""}">
+      <div class="clip"><video src="${sel.clips[i]}" muted loop autoplay playsinline preload="auto" aria-label="Window ${i + 1} clip"></video>
+        <span class="badge">W${i + 1} · ${f2(w.start)}–${f2(end)} s</span>${isLo ? `<span class="role lo">lowest</span>` : ""}</div>
+      <div class="wmeta"><b>W${i + 1}</b><span class="score">score ${w.score.toFixed(3)}</span></div>
+      ${tw ? `<div class="twin">${OTHER[ostate.side]} twin, same window: ${tw.score.toFixed(3)}</div>` : ""}
+      <dl><div><dt>Prediction</dt><dd>${esc(w.prediction)}</dd></div>
+          <div><dt>State <em class="${same ? "" : "diff"}">${same ? "same as prediction" : "differs from prediction"}</em></dt><dd>${esc(w.state)}</dd></div></dl>
+    </article>`;
+  }).join("");
+  $("onote").textContent = `Original IntPhys2 videos (60 fps, ${sc.duration} s), shown here at 256 px and 30 fps. ` +
+    `Scores and sentences come from a single seed-42 run per pair (${sc.trial}). Qwen3-VL-8B-Thinking sees 60 frames per window. ` +
+    `The three lowest windows form the detected interval; each adds its last 1 s. Window clips loop the exact 2 s span that was scored.`;
+}
+
+function tickOrig() {
+  if (!ORIG) return;
+  const a = $("opos"), b = $("oimp"), sc = ORIG.scenes[ostate.scene];
+  if (a.duration && b.duration && Math.abs(a.currentTime - b.currentTime) > 0.15) b.currentTime = a.currentTime;
+  if (a.duration) {
+    const frac = Math.min(1, a.currentTime / a.duration);
+    for (const h of document.querySelectorAll("#optl .head, #oitl .head")) h.style.left = `calc(${frac * 100}% - 1px)`;
+    const p = document.getElementById("oplayhead");
+    if (p) { const X = OL + frac * (OW - OL - OR); p.setAttribute("x1", X); p.setAttribute("x2", X); }
+  }
+}
+
+document.addEventListener("click", e => {
+  const tab = e.target.closest("[data-oi]"), side = e.target.closest("#osideseg button");
+  if (tab) { ostate.scene = +tab.dataset.oi; renderOrig(); }
+  if (side) { ostate.side = side.dataset.side; renderOrig(); }
+});
+renderOrig();
 </script>
