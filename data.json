@@ -1,0 +1,1714 @@
+{
+ "trials": {
+  "wan": 4,
+  "cosmos": 2
+ },
+ "sigmas": [
+  0.5,
+  0.8
+ ],
+ "models": [
+  [
+   "wan",
+   "Wan2.1-1.3B"
+  ],
+  [
+   "cosmos",
+   "Cosmos-Predict2-2B"
+  ]
+ ],
+ "scenes": [
+  {
+   "id": "25-1",
+   "attribute": "continuity",
+   "title": "Ball on the wire track",
+   "desc": "A red ball rolls along a wire track. It is missing from the back wire where it should be, then shows up on the front rail.",
+   "group": "SphereFallingDown_scene25_v1",
+   "gt": [
+    7.57,
+    10.56
+   ],
+   "duration": 10.6,
+   "input": "media/25-1/input.mp4",
+   "runs": {
+    "wan_s05": {
+     "model": "wan",
+     "sigma": 0.5,
+     "video": "media/25-1/wan_s05.mp4",
+     "hit": true,
+     "band": [
+      7.066666666666666,
+      8.0
+     ],
+     "lowest": 6,
+     "candidates": [
+      6,
+      9,
+      2
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.21588246524333954,
+       "prediction": "The two wires with hanging cloths swinging leftward.",
+       "state": "The two wires with hanging cloths swinging leftward."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.1806650608778,
+       "prediction": "The white cloth strips hang from the wires with pink stripes.",
+       "state": "The white cloth strips hang from the wires with pink stripes."
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.16813023388385773,
+       "prediction": "The white cloth strips hang from the wires with pink stripes.",
+       "state": "The white cloth strips hang from the wires with pink stripes."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.18919827044010162,
+       "prediction": "The red ball rolls on the left wire near the cloth.",
+       "state": "The red ball rolls on the left wire near the cloth."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.23425954580307007,
+       "prediction": "The red ball rolls on the left wire toward the cloth.",
+       "state": "The red ball rolls on the left wire toward the cloth."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.2088085263967514,
+       "prediction": "The red ball rolls on the left wire toward the cloth",
+       "state": "The red ball rolls on the left wire toward the cloth"
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.11954443901777267,
+       "prediction": "The red ball rolls on the left wire behind the cloth.",
+       "state": "The red ball rolls on the left wire behind the cloth."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.17038127779960632,
+       "prediction": "The white cloth strips hang from the wires with pink stripes.",
+       "state": "The white cloth strips hang from the wires with pink stripes."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.21330469846725464,
+       "prediction": "The red ball rolls on the left wire toward the lower cloth.",
+       "state": "The red ball rolls on the left wire toward the lower cloth."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.15353639423847198,
+       "prediction": "The red ball rolls on the lower wire behind the cloth.",
+       "state": "The red ball rolls on the lower wire behind the cloth."
+      }
+     ],
+     "picks": [
+      1,
+      6,
+      8,
+      9
+     ],
+     "clips": {
+      "1": "media/25-1/wan_s05_w02.mp4",
+      "6": "media/25-1/wan_s05_w07.mp4",
+      "8": "media/25-1/wan_s05_w09.mp4",
+      "9": "media/25-1/wan_s05_w10.mp4"
+     },
+     "scored_at": "2026-10-15T20:20:48",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "wan_s08": {
+     "model": "wan",
+     "sigma": 0.8,
+     "video": "media/25-1/wan_s08.mp4",
+     "hit": true,
+     "band": [
+      10.0,
+      10.666666666666666
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      7,
+      6
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.1974596381187439,
+       "prediction": "The cream rectangular cloth moves along the lower wire.",
+       "state": "The cream rectangular cloth moves along the lower wire."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.186380073428154,
+       "prediction": "The cream rectangular cloth moves along the lower wire.",
+       "state": "The cream rectangular cloth moves along the lower wire."
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.16491062939167023,
+       "prediction": "The red pyramid moves on the lower wire, behind the left cloth.",
+       "state": "The red pyramid moves on the lower wire, behind the left cloth."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.15649841725826263,
+       "prediction": "The red pyramid moves on the lower wire, behind the left cloth.",
+       "state": "The red pyramid moves on the lower wire, behind the left cloth."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.17663812637329102,
+       "prediction": "The red pyramid rolls on the lower wire behind the left cloth",
+       "state": "The red pyramid rolls on the lower wire behind the left cloth"
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.17072033882141113,
+       "prediction": "The red pyramid moves on the lower wire behind the left cloth",
+       "state": "The red pyramid moves on the lower wire behind the left cloth"
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.15214253962039948,
+       "prediction": "The cream cloths on the wires against the blue sea",
+       "state": "The cream cloths on the wires against the blue sea"
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.13640621304512024,
+       "prediction": "Two cream cloths hang from wires.",
+       "state": "Two cream cloths hang from wires."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.18857668340206146,
+       "prediction": "The red pyramid moves right on the lower wire behind the left cloth.",
+       "state": "The red pyramid moves right on the lower wire behind the left cloth."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.11292918026447296,
+       "prediction": "The red pyramid moves right on the lower wire behind the left cloth.",
+       "state": "The red pyramid moves right on the lower wire behind the left cloth."
+      }
+     ],
+     "picks": [
+      1,
+      6,
+      8,
+      9
+     ],
+     "clips": {
+      "1": "media/25-1/wan_s08_w02.mp4",
+      "6": "media/25-1/wan_s08_w07.mp4",
+      "8": "media/25-1/wan_s08_w09.mp4",
+      "9": "media/25-1/wan_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-15T20:18:49",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "cosmos_s05": {
+     "model": "cosmos",
+     "sigma": 0.5,
+     "video": "media/25-1/cosmos_s05.mp4",
+     "hit": true,
+     "band": [
+      6.955530216647663,
+      9.007981755986318
+     ],
+     "lowest": 6,
+     "candidates": [
+      6,
+      2,
+      7
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.25539150834083557,
+       "prediction": "The black poles support wires with hanging light cloths.",
+       "state": "The black poles support wires with hanging light cloths."
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.2276609092950821,
+       "prediction": "The light-colored cloth with pink patches rolls on the lower line",
+       "state": "The light-colored cloth with pink patches rolls on the lower line"
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.1686982810497284,
+       "prediction": "A light-colored cloth with pink patches",
+       "state": "The red ball rolls on the lower line, visible to the right of the right cloth"
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.25009214878082275,
+       "prediction": "The red ball rolls on the lower line behind the lower cloth",
+       "state": "The red ball rolls on the lower line behind the lower cloth"
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.27751556038856506,
+       "prediction": "The red ball rolls on the lower line behind the lower cloth",
+       "state": "The red ball rolls on the lower line behind the lower cloth"
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.26198315620422363,
+       "prediction": "The red ball rolls on the lower line behind the lower cloth",
+       "state": "The red ball rolls on the lower line behind the lower cloth"
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.074094757437706,
+       "prediction": "The red ball.",
+       "state": "The two lines with cloths and black poles against a blue sky"
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.2113703191280365,
+       "prediction": "The lower cloth hangs on the lower line",
+       "state": "The lower cloth hangs on the lower line"
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.2605443298816681,
+       "prediction": "The red ball rolls on the lower line behind the lower cloth",
+       "state": "The red ball rolls on the lower line behind the lower cloth"
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.25585487484931946,
+       "prediction": "The red ball rolls on the lower line behind the lower cloth",
+       "state": "The red ball rolls on the lower line behind the lower cloth"
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      6,
+      8
+     ],
+     "clips": {
+      "1": "media/25-1/cosmos_s05_w02.mp4",
+      "2": "media/25-1/cosmos_s05_w03.mp4",
+      "6": "media/25-1/cosmos_s05_w07.mp4",
+      "8": "media/25-1/cosmos_s05_w09.mp4"
+     },
+     "scored_at": "2026-10-20T15:41:19",
+     "source": "results_cosmos93_wohint_s42_t2"
+    },
+    "cosmos_s08": {
+     "model": "cosmos",
+     "sigma": 0.8,
+     "video": "media/25-1/cosmos_s08.mp4",
+     "hit": true,
+     "band": [
+      10.034207525655646,
+      10.604332953249715
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      1,
+      7
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.21505379676818848,
+       "prediction": "The black pole and wire structure against the sky and ocean",
+       "state": "The black pole and wire structure against the sky and ocean"
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.07954317331314087,
+       "prediction": "The black pole and wire structure against the sky and ocean",
+       "state": "The black pole and wire structure against the sky and ocean"
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.1600075215101242,
+       "prediction": "The red sphere moves along the lower wire behind the cloth.",
+       "state": "The red sphere moves along the lower wire behind the cloth."
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.20008909702301025,
+       "prediction": "The red sphere moves along the lower wire behind the right cloth.",
+       "state": "The red sphere moves along the lower wire behind the right cloth."
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.23163795471191406,
+       "prediction": "The red sphere moves along the lower wire behind the right cloth.",
+       "state": "The red sphere moves along the lower wire behind the right cloth."
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.17723527550697327,
+       "prediction": "The red sphere is on the lower wire behind the right cloth",
+       "state": "The red sphere is on the lower wire behind the right cloth"
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.14547598361968994,
+       "prediction": "The red sphere moves along the lower wire behind the right cloth.",
+       "state": "The red sphere moves along the lower wire behind the right cloth."
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.08791887015104294,
+       "prediction": "The red sphere.",
+       "state": "The black pole and wire structure against the sky and ocean"
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.09372179955244064,
+       "prediction": "The red sphere.",
+       "state": "The black poles and wire structure with white cloths against the sky and ocean."
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.054292771965265274,
+       "prediction": "The red sphere.",
+       "state": "The black pole and wire structure against the sky and ocean"
+      }
+     ],
+     "picks": [
+      1,
+      6,
+      8,
+      9
+     ],
+     "clips": {
+      "1": "media/25-1/cosmos_s08_w02.mp4",
+      "6": "media/25-1/cosmos_s08_w07.mp4",
+      "8": "media/25-1/cosmos_s08_w09.mp4",
+      "9": "media/25-1/cosmos_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-20T15:39:52",
+     "source": "results_cosmos93_wohint_s42_t2"
+    }
+   }
+  },
+  {
+   "id": "imm-109-1",
+   "attribute": "immutability",
+   "title": "Hot-air balloon basket",
+   "desc": "The basket of a hot-air balloon leaves the view. When it comes back, the orange object it carried has turned green.",
+   "group": "HotAirBallon_scene109_v1",
+   "gt": [
+    6.21,
+    8.27
+   ],
+   "duration": 10.6,
+   "input": "media/imm-109-1/input.mp4",
+   "runs": {
+    "wan_s05": {
+     "model": "wan",
+     "sigma": 0.5,
+     "video": "media/imm-109-1/wan_s05.mp4",
+     "hit": true,
+     "band": [
+      7.066666666666666,
+      9.066666666666666
+     ],
+     "lowest": 6,
+     "candidates": [
+      6,
+      7,
+      3
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.2476896345615387,
+       "prediction": "The orange ball sits inside the brown basket of the hot air balloon.",
+       "state": "The orange ball sits inside the brown basket of the hot air balloon."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.2166856974363327,
+       "prediction": "The hot air balloon's brown basket holds a pink cloth on the white ground",
+       "state": "The hot air balloon's brown basket holds a pink cloth on the white ground"
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.2603854238986969,
+       "prediction": "The brown basket sits on the white ground below the hot air balloon.",
+       "state": "The brown basket sits on the white ground below the hot air balloon."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.07889384776353836,
+       "prediction": "The orange ball.",
+       "state": "The pink disc sits inside the brown basket of the hot air balloon."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.08455759286880493,
+       "prediction": "The brown basket with wheels rests on the white surface, its shadow cast upon the ground.",
+       "state": "The brown basket with wheels rests on the white surface, its shadow cast upon the ground."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.09795629978179932,
+       "prediction": "The brown basket rests on the white surface with a shadow cast upon the ground.",
+       "state": "The brown basket rests on the white surface with a shadow cast upon the ground."
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.07157155126333237,
+       "prediction": "The orange ball.",
+       "state": "The green ball sits inside the brown basket on the white surface."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.07460150122642517,
+       "prediction": "The orange ball.",
+       "state": "The green sphere rests inside the brown basket of the hot air balloon."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.09206128865480423,
+       "prediction": "The orange ball.",
+       "state": "The green ball sits inside the brown basket of the hot air balloon."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.08367456495761871,
+       "prediction": "The orange ball.",
+       "state": "The green ball sits inside the brown basket of the hot air balloon."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      7
+     ],
+     "clips": {
+      "1": "media/imm-109-1/wan_s05_w02.mp4",
+      "4": "media/imm-109-1/wan_s05_w05.mp4",
+      "6": "media/imm-109-1/wan_s05_w07.mp4",
+      "7": "media/imm-109-1/wan_s05_w08.mp4"
+     },
+     "scored_at": "2026-10-15T20:45:25",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "wan_s08": {
+     "model": "wan",
+     "sigma": 0.8,
+     "video": "media/imm-109-1/wan_s08.mp4",
+     "hit": true,
+     "band": [
+      8.0,
+      10.666666666666666
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      8,
+      7
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.19362416863441467,
+       "prediction": "The orange sphere rests on the pink cloth inside the hot air balloon basket against the white background.",
+       "state": "The orange sphere rests on the pink cloth inside the hot air balloon basket against the white background."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.1457139402627945,
+       "prediction": "The hot air balloon basket contains a pink cloth against the white background",
+       "state": "The hot air balloon basket contains a pink cloth against the white background"
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.2138109803199768,
+       "prediction": "The orange sphere rests on the pink cloth inside the hot air balloon basket against the white background.",
+       "state": "The orange sphere rests on the pink cloth inside the hot air balloon basket against the white background."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.21026760339736938,
+       "prediction": "The brown hot air balloon basket sits on a white surface against a blue sky background.",
+       "state": "The brown hot air balloon basket sits on a white surface against a blue sky background."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2164524793624878,
+       "prediction": "The brown hot air balloon basket holds the pink cloth on the white surface against the blue sky background, with a dark shadow below.",
+       "state": "The brown hot air balloon basket holds the pink cloth on the white surface against the blue sky background, with a dark shadow below."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.223160058259964,
+       "prediction": "The brown hot air balloon basket holds a pink cloth on the white surface against a blue sky background, with a dark shadow below.",
+       "state": "The brown hot air balloon basket holds a pink cloth on the white surface against a blue sky background, with a dark shadow below."
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.12151432037353516,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere rests on the pink cloth inside the hot air balloon basket against the blue sky background."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.09808145463466644,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere rests on the pink cloth inside the hot air balloon basket against the blue sky background."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.09067220240831375,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere rests on the pink cloth inside the brown hot air balloon basket against the blue sky background."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.08610999584197998,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere rests on the pink cloth inside the brown hot air balloon basket against the blue sky background."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      9
+     ],
+     "clips": {
+      "1": "media/imm-109-1/wan_s08_w02.mp4",
+      "4": "media/imm-109-1/wan_s08_w05.mp4",
+      "6": "media/imm-109-1/wan_s08_w07.mp4",
+      "9": "media/imm-109-1/wan_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-15T20:46:44",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "cosmos_s05": {
+     "model": "cosmos",
+     "sigma": 0.5,
+     "video": "media/imm-109-1/cosmos_s05.mp4",
+     "hit": true,
+     "band": [
+      7.9817559863169905,
+      10.604332953249715
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      8,
+      7
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.26418691873550415,
+       "prediction": "The orange sphere is inside the basket of the hot air balloon.",
+       "state": "The orange sphere is inside the basket of the hot air balloon."
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.20318368077278137,
+       "prediction": "The basket with a pink interior is brown, the hot air balloon has red and blue stripes, the background is white",
+       "state": "The basket with a pink interior is brown, the hot air balloon has red and blue stripes, the background is white"
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.17713578045368195,
+       "prediction": "The orange sphere is inside the brown basket with pink interior",
+       "state": "The orange sphere is inside the brown basket with pink interior"
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.21458397805690765,
+       "prediction": "The brown basket with pink interior hangs over white ground with blue sky background",
+       "state": "The brown basket with pink interior hangs over white ground with blue sky background"
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.24258704483509064,
+       "prediction": "The brown basket with pink interior is suspended over a white ground with blue sky background.",
+       "state": "The brown basket with pink interior is suspended over a white ground with blue sky background."
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.20993617177009583,
+       "prediction": "The brown basket with pink interior floats above white ground with blue sky background",
+       "state": "The brown basket with pink interior floats above white ground with blue sky background"
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.12052157521247864,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere is inside the brown basket with pink interior"
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.10351811349391937,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere is inside the brown basket with pink interior"
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.10033701360225677,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere is inside the brown basket with pink interior."
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.07930795848369598,
+       "prediction": "The orange sphere.",
+       "state": "The green sphere is inside the brown basket with pink interior"
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      9
+     ],
+     "clips": {
+      "1": "media/imm-109-1/cosmos_s05_w02.mp4",
+      "4": "media/imm-109-1/cosmos_s05_w05.mp4",
+      "6": "media/imm-109-1/cosmos_s05_w07.mp4",
+      "9": "media/imm-109-1/cosmos_s05_w10.mp4"
+     },
+     "scored_at": "2026-10-20T16:06:20",
+     "source": "results_cosmos93_wohint_s42_t2"
+    },
+    "cosmos_s08": {
+     "model": "cosmos",
+     "sigma": 0.8,
+     "video": "media/imm-109-1/cosmos_s08.mp4",
+     "hit": false,
+     "band": [
+      9.007981755986318,
+      10.604332953249715
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      8,
+      6
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.10629116743803024,
+       "prediction": "The yellow cube is in the brown basket with pink lining.",
+       "state": "The yellow cube is in the brown basket with pink lining."
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.1146831214427948,
+       "prediction": "The yellow cube is in the brown basket with pink lining.",
+       "state": "The yellow cube is in the brown basket with pink lining."
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.1175307184457779,
+       "prediction": "The yellow cube is visible inside the tilted brown basket with pink lining showing.",
+       "state": "The yellow cube is visible inside the tilted brown basket with pink lining showing."
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.18221065402030945,
+       "prediction": "The tilted brown basket with pink lining shows only its shadow on the white surface with blue horizon.",
+       "state": "The tilted brown basket with pink lining shows only its shadow on the white surface with blue horizon."
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.09971295297145844,
+       "prediction": "The brown basket with pink lining is tilted on the white surface.",
+       "state": "The brown basket with pink lining is tilted on the white surface."
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.1873997300863266,
+       "prediction": "The tilted brown basket with pink lining is hanging against the blue sky.",
+       "state": "The tilted brown basket with pink lining is hanging against the blue sky."
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.07675566524267197,
+       "prediction": "The yellow cube",
+       "state": "The green cube is inside the tilted brown basket with pink lining"
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.08458048850297928,
+       "prediction": "The yellow cube.",
+       "state": "The green sphere is visible inside the brown basket with pink lining."
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.07654835283756256,
+       "prediction": "The yellow cube.",
+       "state": "The green sphere is inside the brown basket with pink lining on the white surface."
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.05680784210562706,
+       "prediction": "The yellow cube.",
+       "state": "The green sphere is inside the hot air balloon basket on white ground."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      9
+     ],
+     "clips": {
+      "1": "media/imm-109-1/cosmos_s08_w02.mp4",
+      "4": "media/imm-109-1/cosmos_s08_w05.mp4",
+      "6": "media/imm-109-1/cosmos_s08_w07.mp4",
+      "9": "media/imm-109-1/cosmos_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-20T16:06:25",
+     "source": "results_cosmos93_wohint_s42_t2"
+    }
+   }
+  },
+  {
+   "id": "perm-229-1",
+   "attribute": "permanence",
+   "title": "Ball behind the cloth",
+   "desc": "A gold ball rolls along a rail behind a hanging cloth and never comes out from under it.",
+   "group": "SphereFallingDown_scene229_v1",
+   "gt": [
+    6.5,
+    8.12
+   ],
+   "duration": 10.583,
+   "input": "media/perm-229-1/input.mp4",
+   "runs": {
+    "wan_s05": {
+     "model": "wan",
+     "sigma": 0.5,
+     "video": "media/perm-229-1/wan_s05.mp4",
+     "hit": false,
+     "band": [
+      10.0,
+      10.666666666666666
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      7,
+      6
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.26911693811416626,
+       "prediction": "The brown cloth on the horizontal bar, in front of the park buildings and pathway",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway"
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.2675400674343109,
+       "prediction": "The brown cloth on the horizontal bar, in front of the park buildings and pathway",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway"
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.21708102524280548,
+       "prediction": "The yellow ball rests on the horizontal bar, in front of the park buildings and pathway",
+       "state": "The yellow ball rests on the horizontal bar, in front of the park buildings and pathway"
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.13297806680202484,
+       "prediction": "The yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.09163522720336914,
+       "prediction": "A yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.07445517182350159,
+       "prediction": "The yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar"
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.068919837474823,
+       "prediction": "The yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar"
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.029628310352563858,
+       "prediction": "A yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.07167533785104752,
+       "prediction": "The yellow ball",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar"
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.02574198693037033,
+       "prediction": "A yellow ball.",
+       "state": "The brown cloth on the horizontal bar, in front of the park buildings and pathway; the yellow ball is absent from the horizontal bar."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      9
+     ],
+     "clips": {
+      "1": "media/perm-229-1/wan_s05_w02.mp4",
+      "4": "media/perm-229-1/wan_s05_w05.mp4",
+      "6": "media/perm-229-1/wan_s05_w07.mp4",
+      "9": "media/perm-229-1/wan_s05_w10.mp4"
+     },
+     "scored_at": "2026-10-15T21:31:26",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "wan_s08": {
+     "model": "wan",
+     "sigma": 0.8,
+     "video": "media/perm-229-1/wan_s08.mp4",
+     "hit": false,
+     "band": [
+      2.0,
+      3.066666666666667
+     ],
+     "lowest": 1,
+     "candidates": [
+      1,
+      9,
+      5
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.1521855741739273,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.20525583624839783,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden"
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.2404949814081192,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden; the fabric is lifted away from its resting place.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden; the fabric is lifted away from its resting place."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.22702555358409882,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.21441549062728882,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.21409641206264496,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.21440371870994568,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.23182258009910583,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.22238008677959442,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.209359809756279,
+       "prediction": "The light brown fabric hangs between two metal poles in the courtyard garden.",
+       "state": "The light brown fabric hangs between two metal poles in the courtyard garden."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      9
+     ],
+     "clips": {
+      "1": "media/perm-229-1/wan_s08_w02.mp4",
+      "4": "media/perm-229-1/wan_s08_w05.mp4",
+      "6": "media/perm-229-1/wan_s08_w07.mp4",
+      "9": "media/perm-229-1/wan_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-15T21:31:43",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "cosmos_s05": {
+     "model": "cosmos",
+     "sigma": 0.5,
+     "video": "media/perm-229-1/cosmos_s05.mp4",
+     "hit": true,
+     "band": [
+      7.053469852104665,
+      8.987485779294653
+     ],
+     "lowest": 6,
+     "candidates": [
+      6,
+      7,
+      9
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0477815699658706,
+       "score": 0.13241660594940186,
+       "prediction": "The miniature city model with buildings, lawns, and a banner on a fence.",
+       "state": "The miniature city model with buildings, lawns, and a banner on a fence."
+      },
+      {
+       "start": 1.0238907849829353,
+       "end": 2.957906712172924,
+       "score": 0.13993936777114868,
+       "prediction": "The yellow ball rests on the fence near the courtyard buildings.",
+       "state": "The yellow ball rests on the fence near the courtyard buildings."
+      },
+      {
+       "start": 2.0477815699658706,
+       "end": 3.9817974971558594,
+       "score": 0.16491848230361938,
+       "prediction": "The yellow ball rests on the fence near the courtyard buildings.",
+       "state": "The yellow ball rests on the fence near the courtyard buildings."
+      },
+      {
+       "start": 2.957906712172924,
+       "end": 5.005688282138794,
+       "score": 0.18608728051185608,
+       "prediction": "The yellow ball rests on the fence near the courtyard buildings.",
+       "state": "The yellow ball rests on the fence near the courtyard buildings."
+      },
+      {
+       "start": 3.9817974971558594,
+       "end": 6.0295790671217295,
+       "score": 0.17411866784095764,
+       "prediction": "A banner hangs across the courtyard, obscuring the fence area.",
+       "state": "A banner hangs across the courtyard, obscuring the fence area."
+      },
+      {
+       "start": 5.005688282138794,
+       "end": 7.053469852104665,
+       "score": 0.06296491622924805,
+       "prediction": "The yellow ball.",
+       "state": "A courtyard with buildings, fence, green grass, and paved area are visible."
+      },
+      {
+       "start": 6.0295790671217295,
+       "end": 7.963594994311719,
+       "score": 0.020955078303813934,
+       "prediction": "A yellow ball.",
+       "state": "The fence and courtyard buildings are visible with a banner hanging between posts; the yellow ball is absent from the fence near the courtyard buildings."
+      },
+      {
+       "start": 7.053469852104665,
+       "end": 8.987485779294653,
+       "score": 0.021321335807442665,
+       "prediction": "A yellow ball.",
+       "state": "The courtyard view shows buildings, a fence, and a banner; the yellow ball is absent from the fence."
+      },
+      {
+       "start": 7.963594994311719,
+       "end": 10.011376564277588,
+       "score": 0.06315424293279648,
+       "prediction": "The yellow ball.",
+       "state": "The courtyard's fence and banner are visible; the yellow ball is absent from the fence."
+      },
+      {
+       "start": 8.987485779294653,
+       "end": 10.580204778156997,
+       "score": 0.022075682878494263,
+       "prediction": "A yellow ball.",
+       "state": "The courtyard features buildings, a fence, and a flag."
+      }
+     ],
+     "picks": [
+      1,
+      4,
+      6,
+      7
+     ],
+     "clips": {
+      "1": "media/perm-229-1/cosmos_s05_w02.mp4",
+      "4": "media/perm-229-1/cosmos_s05_w05.mp4",
+      "6": "media/perm-229-1/cosmos_s05_w07.mp4",
+      "7": "media/perm-229-1/cosmos_s05_w08.mp4"
+     },
+     "scored_at": "2026-10-20T16:51:49",
+     "source": "results_cosmos93_wohint_s42_t2"
+    },
+    "cosmos_s08": {
+     "model": "cosmos",
+     "sigma": 0.8,
+     "video": "media/perm-229-1/cosmos_s08.mp4",
+     "hit": false,
+     "band": [
+      2.0477815699658706,
+      3.9817974971558594
+     ],
+     "lowest": 1,
+     "candidates": [
+      1,
+      2,
+      6
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0477815699658706,
+       "score": 0.1982327401638031,
+       "prediction": "The miniature city with buildings, green lawns, and fence barrier.",
+       "state": "The miniature city with buildings, green lawns, and fence barrier."
+      },
+      {
+       "start": 1.0238907849829353,
+       "end": 2.957906712172924,
+       "score": 0.1267954558134079,
+       "prediction": "The beige cloth hangs between two wooden posts on a fence, with miniature buildings and a green lawn behind it.",
+       "state": "The beige cloth hangs between two wooden posts on a fence, with miniature buildings and a green lawn behind it."
+      },
+      {
+       "start": 2.0477815699658706,
+       "end": 3.9817974971558594,
+       "score": 0.17799264192581177,
+       "prediction": "A stone pathway runs between two ornate buildings, with a brown banner stretched between posts.",
+       "state": "A stone pathway runs between two ornate buildings, with a brown banner stretched between posts."
+      },
+      {
+       "start": 2.957906712172924,
+       "end": 5.005688282138794,
+       "score": 0.2536677122116089,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      },
+      {
+       "start": 3.9817974971558594,
+       "end": 6.0295790671217295,
+       "score": 0.25060802698135376,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      },
+      {
+       "start": 5.005688282138794,
+       "end": 7.053469852104665,
+       "score": 0.2523074746131897,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      },
+      {
+       "start": 6.0295790671217295,
+       "end": 7.963594994311719,
+       "score": 0.2268032431602478,
+       "prediction": "Two vertical posts hold a horizontal banner in front of a building with a central courtyard and green lawn.",
+       "state": "Two vertical posts hold a horizontal banner in front of a building with a central courtyard and green lawn."
+      },
+      {
+       "start": 7.053469852104665,
+       "end": 8.987485779294653,
+       "score": 0.25317394733428955,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      },
+      {
+       "start": 7.963594994311719,
+       "end": 10.011376564277588,
+       "score": 0.25825682282447815,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      },
+      {
+       "start": 8.987485779294653,
+       "end": 10.580204778156997,
+       "score": 0.24021539092063904,
+       "prediction": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard",
+       "state": "Two vertical posts hold a horizontal banner between buildings and a grassy courtyard"
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      4,
+      6
+     ],
+     "clips": {
+      "1": "media/perm-229-1/cosmos_s08_w02.mp4",
+      "2": "media/perm-229-1/cosmos_s08_w03.mp4",
+      "4": "media/perm-229-1/cosmos_s08_w05.mp4",
+      "6": "media/perm-229-1/cosmos_s08_w07.mp4"
+     },
+     "scored_at": "2026-10-20T16:50:37",
+     "source": "results_cosmos93_wohint_s42_t2"
+    }
+   }
+  },
+  {
+   "id": "sol-1-1",
+   "attribute": "solidity",
+   "title": "Crate on the pedestal",
+   "desc": "A falling crate lands flat on the pedestal, passing through the brick instead of tilting on it.",
+   "group": "SolidityFallingFlat_scene1_v1",
+   "gt": [
+    3.82,
+    5.92
+   ],
+   "duration": 10.6,
+   "input": "media/sol-1-1/input.mp4",
+   "runs": {
+    "wan_s05": {
+     "model": "wan",
+     "sigma": 0.5,
+     "video": "media/sol-1-1/wan_s05.mp4",
+     "hit": true,
+     "band": [
+      4.0,
+      6.0
+     ],
+     "lowest": 3,
+     "candidates": [
+      3,
+      9,
+      4
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.17332857847213745,
+       "prediction": "The green metal container hangs in mid-air above the white platform.",
+       "state": "The green metal container hangs in mid-air above the white platform."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.1325015425682068,
+       "prediction": "The green metal container rests on the white platform.",
+       "state": "The green metal container hangs in mid-air above the white platform with the red cylinder block on it."
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.12951762974262238,
+       "prediction": "The green metal container rests on top of the pink cylinder.",
+       "state": "The green metal container rests on top of the pink cylinder."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.11270613968372345,
+       "prediction": "The green metal container rests on top of the pink cylinder on the white platform.",
+       "state": "The green metal container rests on top of the pink cylinder on the white platform."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.1290440559387207,
+       "prediction": "The green metal container rests on top of the white platform.",
+       "state": "The green metal container rests on top of the white platform."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.13507702946662903,
+       "prediction": "The green metal container rests on top of the white platform.",
+       "state": "The green metal container rests on top of the white platform."
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.13352614641189575,
+       "prediction": "The green metal container rests on top of the white platform.",
+       "state": "The green metal container rests on top of the white platform."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.12983956933021545,
+       "prediction": "The green metal container rests on top of the white platform.",
+       "state": "The green metal container rests on top of the white platform."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.1366828829050064,
+       "prediction": "The green metal container rests on top of the white platform.",
+       "state": "The green metal container rests on top of the white platform."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.1144733652472496,
+       "prediction": "The green metal container sits on top of the white platform.",
+       "state": "The green metal container sits on top of the white platform."
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      3,
+      4
+     ],
+     "clips": {
+      "1": "media/sol-1-1/wan_s05_w02.mp4",
+      "2": "media/sol-1-1/wan_s05_w03.mp4",
+      "3": "media/sol-1-1/wan_s05_w04.mp4",
+      "4": "media/sol-1-1/wan_s05_w05.mp4"
+     },
+     "scored_at": "2026-10-15T20:15:37",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "wan_s08": {
+     "model": "wan",
+     "sigma": 0.8,
+     "video": "media/sol-1-1/wan_s08.mp4",
+     "hit": false,
+     "band": [
+      10.0,
+      10.666666666666666
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      4,
+      5
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.11768164485692978,
+       "prediction": "The pink cylinder rests on the white block; the green cage hangs in the air with nothing under it.",
+       "state": "The pink cylinder rests on the white block; the green cage hangs in the air with nothing under it."
+      },
+      {
+       "start": 1.0666666666666667,
+       "end": 3.066666666666667,
+       "score": 0.11563140898942947,
+       "prediction": "The pink cylinder rests on top of the white block; the green cage hangs in the air above it.",
+       "state": "The pink cylinder rests on top of the white block; the green cage hangs in the air above it."
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.10600484162569046,
+       "prediction": "The green cage rests on top of the pink cylinder; the pink cylinder sits on the white block.",
+       "state": "The green cage rests on top of the pink cylinder; the pink cylinder sits on the white block."
+      },
+      {
+       "start": 3.066666666666667,
+       "end": 5.066666666666666,
+       "score": 0.09954904019832611,
+       "prediction": "The green cage rests on top of the pink cylinder; the pink cylinder sits on the white block.",
+       "state": "The green cage rests on top of the pink cylinder; the pink cylinder sits on the white block."
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.05399840325117111,
+       "prediction": "The green cage rests on top of the pink cylinder.",
+       "state": "The green cage rests on the white block."
+      },
+      {
+       "start": 5.066666666666666,
+       "end": 7.066666666666666,
+       "score": 0.056122489273548126,
+       "prediction": "The green cage rests on top of the pink cylinder.",
+       "state": "The green cage rests on top of the white block."
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.09248636662960052,
+       "prediction": "The green cage rests on top of the white block.",
+       "state": "The green cage rests on top of the white block."
+      },
+      {
+       "start": 7.066666666666666,
+       "end": 9.066666666666666,
+       "score": 0.0914350301027298,
+       "prediction": "The green cage rests on top of the white block.",
+       "state": "The green cage rests on top of the white block."
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.08585010468959808,
+       "prediction": "The green cage rests on top of the white block.",
+       "state": "The green cage rests on top of the white block."
+      },
+      {
+       "start": 9.066666666666666,
+       "end": 10.666666666666666,
+       "score": 0.03827482461929321,
+       "prediction": "The green cage rests on top of the white block.",
+       "state": "The green cage rests on top of the white block."
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      4,
+      9
+     ],
+     "clips": {
+      "1": "media/sol-1-1/wan_s08_w02.mp4",
+      "2": "media/sol-1-1/wan_s08_w03.mp4",
+      "4": "media/sol-1-1/wan_s08_w05.mp4",
+      "9": "media/sol-1-1/wan_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-15T20:19:17",
+     "source": "results_wan_wohint_s42_t4"
+    },
+    "cosmos_s05": {
+     "model": "cosmos",
+     "sigma": 0.5,
+     "video": "media/sol-1-1/cosmos_s05.mp4",
+     "hit": false,
+     "band": [
+      10.034207525655646,
+      10.604332953249715
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      6,
+      4
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.23126715421676636,
+       "prediction": "The green crate floats above the pink stack on the white block.",
+       "state": "The green crate floats above the pink stack on the white block."
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.2253423035144806,
+       "prediction": "The green crate floats above the pink stack on the white block.",
+       "state": "The green crate floats above the pink stack on the white block."
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.217126727104187,
+       "prediction": "The green crate floats above the pink stack on the white block.",
+       "state": "The green crate floats above the pink stack on the white block."
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.20441889762878418,
+       "prediction": "The green crate floats above the pink stack on the white block.",
+       "state": "The green crate floats above the pink stack on the white block."
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.16288277506828308,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.16465184092521667,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.16048818826675415,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.16784994304180145,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.16463269293308258,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.14200754463672638,
+       "prediction": "The green crate rests on top of the white block.",
+       "state": "The green crate rests on top of the white block."
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      4,
+      9
+     ],
+     "clips": {
+      "1": "media/sol-1-1/cosmos_s05_w02.mp4",
+      "2": "media/sol-1-1/cosmos_s05_w03.mp4",
+      "4": "media/sol-1-1/cosmos_s05_w05.mp4",
+      "9": "media/sol-1-1/cosmos_s05_w10.mp4"
+     },
+     "scored_at": "2026-10-20T15:34:20",
+     "source": "results_cosmos93_wohint_s42_t2"
+    },
+    "cosmos_s08": {
+     "model": "cosmos",
+     "sigma": 0.8,
+     "video": "media/sol-1-1/cosmos_s08.mp4",
+     "hit": false,
+     "band": [
+      10.034207525655646,
+      10.604332953249715
+     ],
+     "lowest": 9,
+     "candidates": [
+      9,
+      7,
+      2
+     ],
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0524515393386547,
+       "score": 0.23927094042301178,
+       "prediction": "The green crate floats in midair above the red cylinder.",
+       "state": "The green crate floats in midair above the red cylinder."
+      },
+      {
+       "start": 1.0262257696693273,
+       "end": 2.9646522234891677,
+       "score": 0.21055692434310913,
+       "prediction": "The green cage floats above the red cylinder, which rests on the white cube.",
+       "state": "The green cage floats above the red cylinder, which rests on the white cube."
+      },
+      {
+       "start": 2.0524515393386547,
+       "end": 3.9908779931584952,
+       "score": 0.1219683438539505,
+       "prediction": "The green cage rests on top of the red cylinder.",
+       "state": "The green cage floats above the red cylinder on top of the white cube."
+      },
+      {
+       "start": 2.9646522234891677,
+       "end": 5.017103762827823,
+       "score": 0.14025083184242249,
+       "prediction": "The green wire cage rests on top of the pink cylinder, which sits on the white cube.",
+       "state": "The green wire cage rests on top of the pink cylinder, which sits on the white cube."
+      },
+      {
+       "start": 3.9908779931584952,
+       "end": 6.043329532497149,
+       "score": 0.14713551104068756,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      },
+      {
+       "start": 5.017103762827823,
+       "end": 6.955530216647663,
+       "score": 0.13338452577590942,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      },
+      {
+       "start": 6.043329532497149,
+       "end": 7.9817559863169905,
+       "score": 0.12389574944972992,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      },
+      {
+       "start": 6.955530216647663,
+       "end": 9.007981755986318,
+       "score": 0.12188564240932465,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      },
+      {
+       "start": 7.9817559863169905,
+       "end": 10.034207525655646,
+       "score": 0.1265355497598648,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      },
+      {
+       "start": 9.007981755986318,
+       "end": 10.604332953249715,
+       "score": 0.08847092092037201,
+       "prediction": "The green wire cage rests on top of the white cube.",
+       "state": "The green wire cage rests on top of the white cube."
+      }
+     ],
+     "picks": [
+      1,
+      2,
+      4,
+      9
+     ],
+     "clips": {
+      "1": "media/sol-1-1/cosmos_s08_w02.mp4",
+      "2": "media/sol-1-1/cosmos_s08_w03.mp4",
+      "4": "media/sol-1-1/cosmos_s08_w05.mp4",
+      "9": "media/sol-1-1/cosmos_s08_w10.mp4"
+     },
+     "scored_at": "2026-10-20T15:37:16",
+     "source": "results_cosmos93_wohint_s42_t2"
+    }
+   }
+  }
+ ]
+}
