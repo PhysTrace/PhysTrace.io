@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: one reading column (max 1080px).
-   Section 1 (reconstructions): scene tabs -> player + model overview -> detail trace -> 2 s window clips.
-   Section 2 (original videos): scene tabs -> Possible / Impossible players -> overlaid trace -> lowest-window clips. */
+   Section 1 (original videos): scene tabs -> Possible / Impossible players -> overlaid trace -> lowest-window clips.
+   Section 2 (reconstructions): scene tabs -> player + model overview -> detail trace -> 2 s window clips. */
 :root {
   --bg: #fbfbfa;
   --surface: #ffffff;
@@ -133,7 +133,7 @@ dt em.diff { color: var(--viol); }
 dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
 .note { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; max-width: 90ch; }
 /* Section 2: original IntPhys2 videos (Possible / Impossible pairs, no generative model). */
-section.orig { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--line); }
+section.qual + section.qual { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--line); }
 .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
 .pair .video { gap: 6px; }
@@ -160,6 +160,48 @@ section.orig { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--
     </nav>
   </header>
 
+  <section class="qual orig" id="orig">
+    <div class="intro">
+      <div class="eyebrow">Original videos · IntPhys2 Possible / Impossible pairs</div>
+      <h2>Can it find the violation in a real video?</h2>
+      <p class="lede">No generative model is involved here. PhysTrace runs directly on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the video: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. When the history says an object should be there and the frames disagree, prediction and state split and the score drops. The impossible video falls to a much lower minimum than its possible twin.</p>
+    </div>
+
+    <div class="tabs" role="tablist" id="otabs"></div>
+
+    <div class="pair">
+      <div class="video">
+        <div class="player"><video id="opos" muted loop autoplay playsinline></video><span class="tag pos">Possible</span><span class="min" id="opmin"></span></div>
+        <div class="timeline" id="optl" aria-hidden="true"></div>
+      </div>
+      <div class="video">
+        <div class="player"><video id="oimp" muted loop autoplay playsinline></video><span class="tag imp">Impossible</span><span class="min" id="oimin"></span></div>
+        <div class="timeline" id="oitl" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="desc" id="odesc" style="margin-top:-8px"></p>
+
+    <div class="detail">
+      <div class="detail-hd">
+        <h3 id="odtitle"></h3>
+        <div class="seg" id="osideseg">
+          <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
+          <button type="button" data-side="possible" aria-pressed="false">Possible</button>
+        </div>
+      </div>
+      <span class="verdict" id="overdict"></span>
+      <div class="chart-big" id="ochart"></div>
+      <div class="legend">
+        <span><i class="ln"></i><span id="olsel">impossible video</span></span>
+        <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
+        <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
+        <span><i style="background:var(--viol)"></i>lowest window</span>
+        <span><i style="background:var(--cand)"></i>other lowest windows</span>
+      </div>
+      <div class="windows" id="owindows"></div>
+      <p class="note" id="onote"></p>
+    </div>
+  </section>
   <section class="qual" id="qual">
     <div class="intro">
       <div class="eyebrow">Generative reconstructions · IntPhys2 Impossible clips</div>
@@ -200,48 +242,6 @@ section.orig { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--
       <div class="chart-big" id="chart"></div>
       <div class="windows" id="windows"></div>
       <p class="note" id="note"></p>
-    </div>
-  </section>
-  <section class="qual orig" id="orig">
-    <div class="intro">
-      <div class="eyebrow">Original videos · IntPhys2 Possible / Impossible pairs</div>
-      <h2>Can it find the violation in a real video?</h2>
-      <p class="lede">No generative model is involved here. PhysTrace runs directly on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation. The pipeline is the same: a <b>2 s window with a 1 s hop</b>, Qwen3-VL-8B-Thinking writes the prediction and the state, and PE-AV-Large scores each window. When the history says an object should be there and the frames disagree, prediction and state split and the score drops. The impossible video falls to a much lower minimum than its possible twin.</p>
-    </div>
-
-    <div class="tabs" role="tablist" id="otabs"></div>
-
-    <div class="pair">
-      <div class="video">
-        <div class="player"><video id="opos" muted loop autoplay playsinline></video><span class="tag pos">Possible</span><span class="min" id="opmin"></span></div>
-        <div class="timeline" id="optl" aria-hidden="true"></div>
-      </div>
-      <div class="video">
-        <div class="player"><video id="oimp" muted loop autoplay playsinline></video><span class="tag imp">Impossible</span><span class="min" id="oimin"></span></div>
-        <div class="timeline" id="oitl" aria-hidden="true"></div>
-      </div>
-    </div>
-    <p class="desc" id="odesc" style="margin-top:-8px"></p>
-
-    <div class="detail">
-      <div class="detail-hd">
-        <h3 id="odtitle"></h3>
-        <div class="seg" id="osideseg">
-          <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
-          <button type="button" data-side="possible" aria-pressed="false">Possible</button>
-        </div>
-      </div>
-      <span class="verdict" id="overdict"></span>
-      <div class="chart-big" id="ochart"></div>
-      <div class="legend">
-        <span><i class="ln"></i><span id="olsel">impossible video</span></span>
-        <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
-        <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
-        <span><i style="background:var(--viol)"></i>lowest window</span>
-        <span><i style="background:var(--cand)"></i>other lowest windows</span>
-      </div>
-      <div class="windows" id="owindows"></div>
-      <p class="note" id="onote"></p>
     </div>
   </section>
 </div>
