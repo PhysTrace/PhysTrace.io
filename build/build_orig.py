@@ -4,18 +4,23 @@
 These examples run PhysTrace directly on the original IntPhys2 videos (no generative model, no noising).
 Each scene is a Possible / Impossible pair of the same setup.
 
-  python3 build/build_orig.py <picks_dir> <site_dir>
+  python3 build/build_orig.py <picks_dir> <site_dir> [gt_csv]
 
 <picks_dir> holds trials.csv, results.csv and video/<attribute>_<group>_{Possible,Impossible}.mp4
-(the figure8_picks export). Outputs <site_dir>/orig.json and <site_dir>/media/orig/<attribute>/*.mp4.
+(the figure8_picks export). [gt_csv] is optional: IntPhys2 GT with columns group, onset_sec, end_sec
+(e.g. videotrace_v2/demo/gt/intphys2_gt.csv); its violation interval is drawn under the Impossible video. Outputs <site_dir>/orig.json and <site_dir>/media/orig/<attribute>/*.mp4.
 Needs ffmpeg.
 """
 import csv, json, os, subprocess, sys
 
 csv.field_size_limit(10 ** 9)
-if len(sys.argv) != 3:
+if len(sys.argv) not in (3, 4):
     sys.exit(__doc__)
 PICKS, OUT = sys.argv[1], sys.argv[2]
+GT = {}
+if len(sys.argv) == 4:
+    GT = {r["group"]: [float(r["onset_sec"]), float(r["end_sec"])]
+          for r in csv.DictReader(open(sys.argv[3], encoding="utf-8")) if r.get("onset_sec")}
 
 # Scene order and one-line descriptions (what happens in the Impossible video).
 SCENES = [
@@ -59,7 +64,9 @@ for attr, title, desc in SCENES:
     j = trials[attr]
     pair, group = j["pair"], j["group"]
     os.makedirs(os.path.join(OUT, "media", "orig", attr), exist_ok=True)
-    scene = {"attribute": attr, "title": title, "desc": desc, "group": group, "sides": {}}
+    scene = {"attribute": attr, "title": title, "desc": desc, "group": group, "gt": GT.get(group), "sides": {}}
+    if GT and scene["gt"] is None:
+        print("NO GT for", group)
     for side, label, hname in (("possible", "Possible", pair["good_name"]), ("impossible", "Impossible", pair["bad_name"])):
         rows = sorted(by_video[hname], key=lambda r: int(r["index"]))
         meta = json.loads(rows[0]["metadata_json"])

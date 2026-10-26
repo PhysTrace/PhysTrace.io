@@ -141,8 +141,6 @@ section.qual + section.qual { margin-top: 56px; padding-top: 44px; border-top: 1
 .player .tag.pos { background: var(--ok); }
 .player .tag.imp { background: var(--viol); }
 .player .min { position: absolute; right: 10px; top: 10px; font: 500 11px var(--f-mono); background: rgba(0, 0, 0, .55); color: #fff; padding: 3px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }
-.timeline .det { position: absolute; top: 4px; height: 14px; background: var(--accent); opacity: .85; border-radius: 2px; }
-.timeline .det.lo { background: var(--viol); opacity: 1; }
 .tab .mins { font: 10.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .tab .mins b { color: var(--viol); font-weight: 500; }
 .legend .ln { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--accent); vertical-align: middle; }
@@ -402,11 +400,10 @@ function ochartSVG(sc) {
 }
 
 function otimeline(sc, side) {
-  const s = sc.sides[side], T = sc.duration;
-  return s.candidates.map(i => {
-    const a = i + 1, b = Math.min(i + 2, T);  // each window adds its last 1 s to the detected interval
-    return `<div class="det ${i === s.lowest ? "lo" : ""}" style="left:${a / T * 100}%;width:${(b - a) / T * 100}%"></div>`;
-  }).join("") + `<div class="head" style="left:0"></div>`;
+  // Only the annotated violation (GT) is drawn, and only under the Impossible video.
+  const T = sc.duration, gt = side === "impossible" ? sc.gt : null;
+  return (gt ? `<div class="band" style="left:${gt[0] / T * 100}%;width:${(gt[1] - gt[0]) / T * 100}%" title="annotated violation"></div>` : "") +
+    `<div class="head" style="left:0"></div>`;
 }
 
 function renderOrig() {
@@ -423,7 +420,7 @@ function renderOrig() {
   $("oimin").textContent = `min ${sc.sides.impossible.min_score.toFixed(3)}`;
   $("optl").innerHTML = otimeline(sc, "possible");
   $("oitl").innerHTML = otimeline(sc, "impossible");
-  $("odesc").innerHTML = `${esc(sc.desc)} <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
+  $("odesc").innerHTML = `${esc(sc.desc)}${sc.gt ? ` <b>Violation ${f2(sc.gt[0])}–${f2(sc.gt[1])} s.</b>` : ""} <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
 
   for (const b of $("osideseg").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.side === ostate.side);
   const label = ostate.side === "impossible" ? "Impossible" : "Possible";
