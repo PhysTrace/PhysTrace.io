@@ -193,7 +193,6 @@ section.qual + section.qual { margin-top: 56px; padding-top: 44px; border-top: 1
         <span id="olgt"><i class="sw" style="background:var(--viol-soft);border:1px solid var(--viol)"></i>annotated violation (impossible video)</span>
         <span><i class="ln"></i><span id="olsel">impossible video</span></span>
         <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
-        <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
         <span><i style="background:var(--viol)"></i>lowest window</span>
         <span><i style="background:var(--cand)"></i>other lowest windows</span>
       </div>
@@ -384,8 +383,6 @@ function ochartSVG(sc) {
     g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
     g += `<text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="11" ${mono} fill="var(--muted)">${v.toFixed(2)}</text>`;
   }
-  const by = H - B + 8;
-  sel.intervals.forEach(([a, b]) => g += `<rect x="${x(a)}" y="${by}" width="${Math.max(2, x(b) - x(a))}" height="6" rx="1.5" fill="var(--accent)"/>`);
   for (let t = 0; t <= Math.floor(T); t++)
     g += `<text x="${x(t)}" y="${H - B + 30}" text-anchor="middle" font-size="11" ${mono} fill="var(--muted)">${t}s</text>`;
   g += `<text x="${L}" y="${Tp - 4}" font-size="10.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">window score (PE-AV-Large)</text>`;
@@ -432,9 +429,8 @@ function renderOrig() {
   $("odtitle").textContent = `${label} video, ${sc.attribute}`;
   const lw = sel.windows[sel.lowest];
   $("overdict").textContent = `lowest window W${sel.lowest + 1} (${f2(lw.start)}–${f2(Math.min(lw.end, sc.duration))} s, ${lw.score.toFixed(3)}) · ` +
-    `minimum ${sel.min_score.toFixed(3)} vs. ${twin.min_score.toFixed(3)} in the ${OTHER[ostate.side]} twin · ` +
-    `detected ${sel.intervals.map(([a, b]) => `${f2(a)}–${f2(b)} s`).join(", ")}` +
-    (sc.gt ? ` vs. annotated ${f2(sc.gt[0])}–${f2(sc.gt[1])} s` : "");
+    `minimum ${sel.min_score.toFixed(3)} vs. ${twin.min_score.toFixed(3)} in the ${OTHER[ostate.side]} twin` +
+    (sc.gt ? ` · annotated violation ${f2(sc.gt[0])}–${f2(sc.gt[1])} s` : "");
   $("olsel").textContent = `${ostate.side} video`;
   $("oltwin").textContent = `${OTHER[ostate.side]} twin`;
   $("ochart").innerHTML = ochartSVG(sc);
@@ -454,7 +450,7 @@ function renderOrig() {
   }).join("");
   $("onote").textContent = `Original IntPhys2 videos (60 fps, ${sc.duration} s), shown here at 256 px and 30 fps. ` +
     `Scores and sentences come from a single seed-42 run per pair (${sc.trial}). Qwen3-VL-8B-Thinking sees 60 frames per window. ` +
-    `The three lowest windows form the detected interval; each adds its last 1 s. The annotated violation comes from IntPhys2-Timing. Window clips loop the exact 2 s span that was scored.`;
+    `The three lowest-scoring windows are highlighted. The annotated violation comes from IntPhys2-Timing. Window clips loop the exact 2 s span that was scored.`;
 }
 
 function tickOrig() {
