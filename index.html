@@ -54,7 +54,8 @@ header.paper h1 span { display: block; font-size: .62em; font-weight: 500; color
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 section.qual { padding-top: 38px; display: grid; gap: 22px; }
 h2 { font-family: var(--f-display); font-weight: 600; font-size: 24px; margin: 0; }
-.lede { color: var(--muted); max-width: 72ch; margin: 6px 0 0; }
+.lede { color: var(--muted); max-width: 72ch; margin: 6px auto 0; }
+.intro { text-align: center; }
 .lede b { color: var(--ink); font-weight: 600; }
 .eyebrow { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
@@ -142,7 +143,7 @@ dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
   </header>
 
   <section class="qual" id="qual">
-    <div>
+    <div class="intro">
       <div class="eyebrow">Qualitative results · IntPhys2 Impossible clips</div>
       <h2>When does the video break physics?</h2>
       <p class="lede">Each clip is noised to <b>σ = 0.8</b> and reconstructed by a video world model. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the reconstruction: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. The three lowest windows (the first window is excluded) form the detected interval around the lowest one. It is a <b>hit</b> when that interval overlaps the annotated violation.</p>
