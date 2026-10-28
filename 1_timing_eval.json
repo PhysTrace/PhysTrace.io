@@ -1,0 +1,1029 @@
+{
+ "window_seconds": 2.0,
+ "hop_seconds": 1.0,
+ "clip_model": "pe-av-large",
+ "mllm": "qwen3-vl-thinking",
+ "scenes": [
+  {
+   "attribute": "continuity",
+   "title": "Ball between two cups",
+   "desc": "Two large teacups sit on a theater stage. A ball is placed in the right cup and reappears in the left cup.",
+   "group": "RotatingCup_scene213_v2",
+   "gt": [
+    6.97,
+    9.0
+   ],
+   "sides": {
+    "possible": {
+     "video": "media/1_timing_eval/continuity/possible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.22391469776630402,
+       "state": "Two white cups with red designs sit on the theater stage.",
+       "prediction": "Two white cups with red designs sit on the theater stage.",
+       "trusted": false
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.20149976015090942,
+       "state": "Two large white cups with red designs sit on a stage.",
+       "prediction": "Two large white cups with red designs sit on a stage.",
+       "trusted": false
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.22739243507385254,
+       "state": "The two white cups with red designs sit on saucers on stage.",
+       "prediction": "The two white cups with red designs sit on saucers on stage.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.22197294235229492,
+       "state": "The two white cups with red designs sit on saucers on stage.",
+       "prediction": "The two white cups with red designs sit on saucers on stage.",
+       "trusted": false
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2798152565956116,
+       "state": "Two red-and-white cups sit on saucers in a grand theater.",
+       "prediction": "Two red-and-white cups sit on saucers in a grand theater.",
+       "trusted": false
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.21504732966423035,
+       "state": "Two white cups with red designs sit on saucers on stage.",
+       "prediction": "Two white cups with red designs sit on saucers on stage.",
+       "trusted": false
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.20141157507896423,
+       "state": "Two white cups with red designs sit on saucers on stage.",
+       "prediction": "Two white cups with red designs sit on saucers on stage.",
+       "trusted": false
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.20290125906467438,
+       "state": "The two white cups with red designs sit on saucers on stage.",
+       "prediction": "The two white cups with red designs sit on saucers on stage.",
+       "trusted": true
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.21687501668930054,
+       "state": "The two white cups with red designs sit on saucers on stage.",
+       "prediction": "The two white cups with red designs sit on saucers on stage.",
+       "trusted": false
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.22933927178382874,
+       "state": "The two white cups with red designs sit on saucers on stage.",
+       "prediction": "The two white cups with red designs sit on saucers on stage.",
+       "trusted": false
+      }
+     ],
+     "lowest": 6,
+     "candidates": [
+      1,
+      6,
+      7
+     ],
+     "picks": [
+      1,
+      6,
+      7
+     ],
+     "shown": [
+      0,
+      6,
+      8
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/continuity/possible_w01.mp4",
+      "1": "media/1_timing_eval/continuity/possible_w02.mp4",
+      "6": "media/1_timing_eval/continuity/possible_w07.mp4",
+      "7": "media/1_timing_eval/continuity/possible_w08.mp4",
+      "8": "media/1_timing_eval/continuity/possible_w09.mp4"
+     },
+     "min_score": 0.20141157507896423,
+     "untrusted": 8,
+     "intervals": [
+      [
+       2.0,
+       3.0
+      ],
+      [
+       7.0,
+       9.0
+      ]
+     ]
+    },
+    "impossible": {
+     "video": "media/1_timing_eval/continuity/impossible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.25474071502685547,
+       "state": "Two large red-decorated cups on stage platforms with theater seating behind them.",
+       "prediction": "Two large red-decorated cups on stage platforms with theater seating behind them.",
+       "trusted": false
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.1907443404197693,
+       "state": "The white ball sits on the microphone stand center stage.",
+       "prediction": "The white ball sits on the microphone stand center stage.",
+       "trusted": true
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.21840757131576538,
+       "state": "The white ball sits on the microphone stand between two large red and white teacups.",
+       "prediction": "The white ball sits on the microphone stand between two large red and white teacups.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.21429499983787537,
+       "state": "The white ball sits on the microphone stand between two large red and white teacups",
+       "prediction": "The white ball sits on the microphone stand between two large red and white teacups",
+       "trusted": true
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.24536025524139404,
+       "state": "Two large red and white teacups sit on platforms between a microphone stand",
+       "prediction": "Two large red and white teacups sit on platforms between a microphone stand",
+       "trusted": true
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.24662406742572784,
+       "state": "Two large red and white teacups sit on platforms between a microphone stand",
+       "prediction": "Two large red and white teacups sit on platforms between a microphone stand",
+       "trusted": true
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.11733292788267136,
+       "state": "The white ball sits inside the left teacup.",
+       "prediction": "The white ball sits inside the right teacup.",
+       "trusted": true
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.1926971822977066,
+       "state": "The white ball sits inside the left teacup between the two large red and white teacups.",
+       "prediction": "The white ball sits inside the left teacup between the two large red and white teacups.",
+       "trusted": true
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.19885706901550293,
+       "state": "Two large red and white teacups sit on platforms.",
+       "prediction": "Two large red and white teacups sit on platforms.",
+       "trusted": false
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.2667548358440399,
+       "state": "The two large red and white teacups sit on platforms between a microphone stand.",
+       "prediction": "The two large red and white teacups sit on platforms between a microphone stand.",
+       "trusted": true
+      }
+     ],
+     "lowest": 6,
+     "candidates": [
+      1,
+      6,
+      7
+     ],
+     "picks": [
+      1,
+      6,
+      7
+     ],
+     "shown": [
+      0,
+      6,
+      8
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/continuity/impossible_w01.mp4",
+      "1": "media/1_timing_eval/continuity/impossible_w02.mp4",
+      "6": "media/1_timing_eval/continuity/impossible_w07.mp4",
+      "7": "media/1_timing_eval/continuity/impossible_w08.mp4",
+      "8": "media/1_timing_eval/continuity/impossible_w09.mp4"
+     },
+     "min_score": 0.11733292788267136,
+     "untrusted": 2,
+     "intervals": [
+      [
+       2.0,
+       3.0
+      ],
+      [
+       7.0,
+       9.0
+      ]
+     ]
+    }
+   },
+   "duration": 10.6,
+   "trial": "dbe9872fb51b42568b12071461f8fe68"
+  },
+  {
+   "attribute": "immutability",
+   "title": "Ball along the clothesline",
+   "desc": "A green ball rolls along the clothesline rail behind the towel and comes out the other side yellow.",
+   "group": "SphereFallingDown_scene121_v2",
+   "gt": [
+    6.28,
+    8.03
+   ],
+   "sides": {
+    "possible": {
+     "video": "media/1_timing_eval/immutability/possible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.3079828917980194,
+       "state": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "prediction": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "trusted": true
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.2972208857536316,
+       "state": "The desert landscape with rainbow, palm trees and pink-white towel between poles",
+       "prediction": "The desert landscape with rainbow, palm trees and pink-white towel between poles",
+       "trusted": false
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.27769115567207336,
+       "state": "The desert landscape has rainbow and palm trees with clothesline between poles.",
+       "prediction": "The desert landscape has rainbow and palm trees with clothesline between poles.",
+       "trusted": false
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.2839009165763855,
+       "state": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees",
+       "prediction": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees",
+       "trusted": false
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2702428698539734,
+       "state": "The desert landscape with rainbow, palm trees and clothesline showing pink and white towel between two poles.",
+       "prediction": "The desert landscape with rainbow, palm trees and clothesline showing pink and white towel between two poles.",
+       "trusted": true
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.3278813660144806,
+       "state": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "prediction": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "trusted": true
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.3081892728805542,
+       "state": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "prediction": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees.",
+       "trusted": true
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.31542813777923584,
+       "state": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees. The green sphere rests on the clothesline near the poles.",
+       "prediction": "The pink and white towel hangs between two poles in the desert landscape with a rainbow and oasis of palm trees. The green sphere rests on the clothesline near the poles.",
+       "trusted": true
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.3059651255607605,
+       "state": "The pink and white towel hangs on the clothesline between the poles in the desert landscape with a rainbow and palm trees.",
+       "prediction": "The pink and white towel hangs on the clothesline between the poles in the desert landscape with a rainbow and palm trees.",
+       "trusted": true
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.28223803639411926,
+       "state": "The pink and white towel hangs between two poles on the clothesline in the desert landscape with a rainbow and palm trees",
+       "prediction": "The pink and white towel hangs between two poles on the clothesline in the desert landscape with a rainbow and palm trees",
+       "trusted": true
+      }
+     ],
+     "lowest": 4,
+     "candidates": [
+      2,
+      4,
+      9
+     ],
+     "picks": [
+      2,
+      4,
+      6,
+      9
+     ],
+     "shown": [
+      0,
+      6,
+      8
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/immutability/possible_w01.mp4",
+      "2": "media/1_timing_eval/immutability/possible_w03.mp4",
+      "4": "media/1_timing_eval/immutability/possible_w05.mp4",
+      "6": "media/1_timing_eval/immutability/possible_w07.mp4",
+      "8": "media/1_timing_eval/immutability/possible_w09.mp4",
+      "9": "media/1_timing_eval/immutability/possible_w10.mp4"
+     },
+     "min_score": 0.2702428698539734,
+     "untrusted": 3,
+     "intervals": [
+      [
+       3.0,
+       4.0
+      ],
+      [
+       5.0,
+       6.0
+      ],
+      [
+       10.0,
+       10.6
+      ]
+     ]
+    },
+    "impossible": {
+     "video": "media/1_timing_eval/immutability/impossible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.279435932636261,
+       "state": "Desert landscape with rainbow, palm trees, and a clothesline holding a pink and white towel.",
+       "prediction": "Desert landscape with rainbow, palm trees, and a clothesline holding a pink and white towel.",
+       "trusted": false
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.21675360202789307,
+       "state": "The small green ball rolls along the ground left of the clothesline pole.",
+       "prediction": "The small green ball rolls along the ground left of the clothesline pole.",
+       "trusted": true
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.22091977298259735,
+       "state": "The small green ball rests on the ground left of the clothesline pole.",
+       "prediction": "The small green ball rests on the ground left of the clothesline pole.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.22281791269779205,
+       "state": "The small green ball rests on the clothesline pole left of the pink shirt.",
+       "prediction": "The small green ball rests on the clothesline pole left of the pink shirt.",
+       "trusted": true
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2167789340019226,
+       "state": "The small green ball rolls along the ground left of the clothesline pole.",
+       "prediction": "The small green ball rolls along the ground left of the clothesline pole.",
+       "trusted": true
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.2286374568939209,
+       "state": "The pink shirt hangs on the clothesline pole in the desert landscape.",
+       "prediction": "The pink shirt hangs on the clothesline pole in the desert landscape.",
+       "trusted": true
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.07179061323404312,
+       "state": "The yellow ball rests on the ground right of the clothesline pole.",
+       "prediction": "The green ball rests.",
+       "trusted": false
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.2537574768066406,
+       "state": "The yellow ball rests on the ground near the clothesline pole in the desert landscape with palm trees and a rainbow.",
+       "prediction": "The yellow ball rests on the ground near the clothesline pole in the desert landscape with palm trees and a rainbow.",
+       "trusted": false
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.26084551215171814,
+       "state": "The pink shirt hangs on the clothesline pole in the desert landscape with a rainbow above.",
+       "prediction": "The pink shirt hangs on the clothesline pole in the desert landscape with a rainbow above.",
+       "trusted": true
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.2559146285057068,
+       "state": "The pink shirt hangs on the clothesline pole in the desert landscape with a rainbow above.",
+       "prediction": "The pink shirt hangs on the clothesline pole in the desert landscape with a rainbow above.",
+       "trusted": false
+      }
+     ],
+     "lowest": 6,
+     "candidates": [
+      1,
+      4,
+      6
+     ],
+     "picks": [
+      1,
+      4,
+      6
+     ],
+     "shown": [
+      0,
+      6,
+      8
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/immutability/impossible_w01.mp4",
+      "1": "media/1_timing_eval/immutability/impossible_w02.mp4",
+      "4": "media/1_timing_eval/immutability/impossible_w05.mp4",
+      "6": "media/1_timing_eval/immutability/impossible_w07.mp4",
+      "8": "media/1_timing_eval/immutability/impossible_w09.mp4"
+     },
+     "min_score": 0.07179061323404312,
+     "untrusted": 4,
+     "intervals": [
+      [
+       2.0,
+       3.0
+      ],
+      [
+       5.0,
+       6.0
+      ],
+      [
+       7.0,
+       8.0
+      ]
+     ]
+    }
+   },
+   "duration": 10.6,
+   "trial": "f71a5cf739484aaf9f3421ff486819fe"
+  },
+  {
+   "attribute": "permanence",
+   "title": "Ring in the balloon basket",
+   "desc": "A dark ring sits in a hot-air balloon basket. The view moves away and back, and the basket is empty.",
+   "group": "HotAirBallon_scene219_v1",
+   "gt": [
+    6.32,
+    9.13
+   ],
+   "sides": {
+    "possible": {
+     "video": "media/1_timing_eval/permanence/possible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.26964646577835083,
+       "state": "The blue ball rests inside the hot air balloon basket on the desert ground.",
+       "prediction": "The blue ball rests inside the hot air balloon basket on the desert ground.",
+       "trusted": true
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.24359247088432312,
+       "state": "The hot air balloon basket rises above the desert ground.",
+       "prediction": "The hot air balloon basket rises above the desert ground.",
+       "trusted": false
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.25814327597618103,
+       "state": "The hot air balloon basket rises above the desert ground with trees and clear sky.",
+       "prediction": "The hot air balloon basket rises above the desert ground with trees and clear sky.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.275473952293396,
+       "state": "The hot air balloon basket hangs above the desert ground with trees and clear sky.",
+       "prediction": "The hot air balloon basket hangs above the desert ground with trees and clear sky.",
+       "trusted": true
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2942407727241516,
+       "state": "The hot air balloon basket hangs above the desert ground with trees and clear sky.",
+       "prediction": "The hot air balloon basket hangs above the desert ground with trees and clear sky.",
+       "trusted": true
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.253980815410614,
+       "state": "The hot air balloon basket hangs above desert ground with trees and clear sky, a dark paved area in the foreground, and small posts scattered across the sandy terrain.",
+       "prediction": "The hot air balloon basket hangs above desert ground with trees and clear sky, a dark paved area in the foreground, and small posts scattered across the sandy terrain.",
+       "trusted": false
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.25947800278663635,
+       "state": "The blue ball rests inside the hot air balloon basket on the desert ground.",
+       "prediction": "The blue ball rests inside the hot air balloon basket on the desert ground.",
+       "trusted": true
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.27676594257354736,
+       "state": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "prediction": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "trusted": true
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.28061825037002563,
+       "state": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "prediction": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "trusted": true
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.2754665017127991,
+       "state": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "prediction": "The blue ball rests inside the hot air balloon basket on the desert ground with trees.",
+       "trusted": true
+      }
+     ],
+     "lowest": 1,
+     "candidates": [
+      1,
+      2,
+      5
+     ],
+     "picks": [
+      1,
+      2,
+      5
+     ],
+     "shown": [
+      0,
+      7,
+      9
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/permanence/possible_w01.mp4",
+      "1": "media/1_timing_eval/permanence/possible_w02.mp4",
+      "2": "media/1_timing_eval/permanence/possible_w03.mp4",
+      "5": "media/1_timing_eval/permanence/possible_w06.mp4",
+      "7": "media/1_timing_eval/permanence/possible_w08.mp4",
+      "9": "media/1_timing_eval/permanence/possible_w10.mp4"
+     },
+     "min_score": 0.24359247088432312,
+     "untrusted": 2,
+     "intervals": [
+      [
+       2.0,
+       4.0
+      ],
+      [
+       6.0,
+       7.0
+      ]
+     ]
+    },
+    "impossible": {
+     "video": "media/1_timing_eval/permanence/impossible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.1958329677581787,
+       "state": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "prediction": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "trusted": true
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.17657114565372467,
+       "state": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "prediction": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "trusted": true
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.15588417649269104,
+       "state": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "prediction": "The green ball sits inside the hot air balloon basket on the concrete ground.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.27562758326530457,
+       "state": "The hot air balloon basket hangs suspended over the sandy desert ground, with no green ball visible inside.",
+       "prediction": "The hot air balloon basket hangs suspended over the sandy desert ground, with no green ball visible inside.",
+       "trusted": true
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.3167533278465271,
+       "state": "The hot air balloon basket hangs suspended over the sandy desert ground.",
+       "prediction": "The hot air balloon basket hangs suspended over the sandy desert ground.",
+       "trusted": false
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.26068705320358276,
+       "state": "The hot air balloon basket hangs suspended over sandy desert ground with no green ball visible inside; the basket's interior is empty and the desert ground is visible below.",
+       "prediction": "The hot air balloon basket hangs suspended over sandy desert ground with no green ball visible inside; the basket's interior is empty and the desert ground is visible below.",
+       "trusted": false
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.28621548414230347,
+       "state": "The hot air balloon basket hangs suspended over the sandy desert ground.",
+       "prediction": "The hot air balloon basket hangs suspended over the sandy desert ground.",
+       "trusted": false
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.05662139132618904,
+       "state": "The hot air balloon basket hangs suspended over the sandy desert ground, empty; the green ball is absent from the basket",
+       "prediction": "The green ball is visible.",
+       "trusted": false
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.22244343161582947,
+       "state": "The hot air balloon basket hangs suspended over the concrete ground, with the desert landscape visible.",
+       "prediction": "The hot air balloon basket hangs suspended over the concrete ground, with the desert landscape visible.",
+       "trusted": false
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.2810758948326111,
+       "state": "The hot air balloon basket hangs over the sandy desert ground.",
+       "prediction": "The hot air balloon basket hangs over the sandy desert ground.",
+       "trusted": false
+      }
+     ],
+     "lowest": 7,
+     "candidates": [
+      1,
+      2,
+      7
+     ],
+     "picks": [
+      1,
+      2,
+      7
+     ],
+     "shown": [
+      0,
+      7,
+      9
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/permanence/impossible_w01.mp4",
+      "1": "media/1_timing_eval/permanence/impossible_w02.mp4",
+      "2": "media/1_timing_eval/permanence/impossible_w03.mp4",
+      "7": "media/1_timing_eval/permanence/impossible_w08.mp4",
+      "9": "media/1_timing_eval/permanence/impossible_w10.mp4"
+     },
+     "min_score": 0.05662139132618904,
+     "untrusted": 6,
+     "intervals": [
+      [
+       2.0,
+       4.0
+      ],
+      [
+       8.0,
+       9.0
+      ]
+     ]
+    }
+   },
+   "duration": 10.6,
+   "trial": "26aa7d8b599d433a9350f633c6ddd325"
+  },
+  {
+   "attribute": "solidity",
+   "title": "Cone into the tub",
+   "desc": "A wooden board lies in a white tub. A yellow cone drops into the tub and vanishes instead of resting on the board.",
+   "group": "BoxSoldity_scene42_v1",
+   "gt": [
+    4.72,
+    6.48
+   ],
+   "sides": {
+    "possible": {
+     "video": "media/1_timing_eval/solidity/possible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.22101576626300812,
+       "state": "The wooden block rests on the bottom of the white tub.",
+       "prediction": "The wooden block rests on the bottom of the white tub.",
+       "trusted": true
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.2649531960487366,
+       "state": "The white tub on the sand holds the wooden block at its bottom.",
+       "prediction": "The white tub on the sand holds the wooden block at its bottom.",
+       "trusted": true
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.21838638186454773,
+       "state": "The wooden block rests at the bottom inside the white tub on the sand.",
+       "prediction": "The wooden block rests at the bottom inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.25489434599876404,
+       "state": "The yellow cone stands inside the white tub on the sand.",
+       "prediction": "The yellow cone stands inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.2669299840927124,
+       "state": "The yellow cone stands inside the white tub on the sand.",
+       "prediction": "The yellow cone stands inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.257642537355423,
+       "state": "The yellow cone stands inside the white tub on the sand.",
+       "prediction": "The yellow cone stands inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.26481178402900696,
+       "state": "The yellow cone stands up inside the white tub on the sand.",
+       "prediction": "The yellow cone stands up inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.24435216188430786,
+       "state": "The yellow cone stands upright inside the white tub on the sand.",
+       "prediction": "The yellow cone stands upright inside the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.26424622535705566,
+       "state": "The yellow cone is standing upright within the white tub on the sand.",
+       "prediction": "The yellow cone is standing upright within the white tub on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.24279028177261353,
+       "state": "The yellow cone stands upright inside the white tub on the sand.",
+       "prediction": "The yellow cone stands upright inside the white tub on the sand.",
+       "trusted": true
+      }
+     ],
+     "lowest": 2,
+     "candidates": [
+      0,
+      2,
+      9
+     ],
+     "picks": [
+      0,
+      2,
+      5,
+      9
+     ],
+     "shown": [
+      0,
+      4,
+      6
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/solidity/possible_w01.mp4",
+      "2": "media/1_timing_eval/solidity/possible_w03.mp4",
+      "4": "media/1_timing_eval/solidity/possible_w05.mp4",
+      "5": "media/1_timing_eval/solidity/possible_w06.mp4",
+      "6": "media/1_timing_eval/solidity/possible_w07.mp4",
+      "9": "media/1_timing_eval/solidity/possible_w10.mp4"
+     },
+     "min_score": 0.21838638186454773,
+     "untrusted": 0,
+     "intervals": [
+      [
+       3.0,
+       4.0
+      ]
+     ]
+    },
+    "impossible": {
+     "video": "media/1_timing_eval/solidity/impossible.mp4",
+     "windows": [
+      {
+       "start": 0.0,
+       "end": 2.0,
+       "score": 0.27864524722099304,
+       "state": "The light wooden block rests inside the white bowl on the sand.",
+       "prediction": "The light wooden block rests inside the white bowl on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 1.0,
+       "end": 3.0,
+       "score": 0.24688658118247986,
+       "state": "A white bowl on the sand holds a light wooden block inside.",
+       "prediction": "A white bowl on the sand holds a light wooden block inside.",
+       "trusted": true
+      },
+      {
+       "start": 2.0,
+       "end": 4.0,
+       "score": 0.2217191904783249,
+       "state": "The light wooden block rests inside the white bowl on the sand.",
+       "prediction": "The light wooden block rests inside the white bowl on the sand.",
+       "trusted": true
+      },
+      {
+       "start": 3.0,
+       "end": 5.0,
+       "score": 0.1542733758687973,
+       "state": "A yellow cone falls into the white bowl standing on the sand.",
+       "prediction": "The light wooden block rests inside the bowl.",
+       "trusted": false
+      },
+      {
+       "start": 4.0,
+       "end": 6.0,
+       "score": 0.07870036363601685,
+       "state": "The white bowl stands on the sand and the yellow pyramid is not visible.",
+       "prediction": "The yellow pyramid rests on the light wooden block.",
+       "trusted": false
+      },
+      {
+       "start": 5.0,
+       "end": 7.0,
+       "score": 0.2525086998939514,
+       "state": "The white bowl rests on the sand, with palm trees behind it.",
+       "prediction": "The white bowl rests on the sand, with palm trees behind it.",
+       "trusted": true
+      },
+      {
+       "start": 6.0,
+       "end": 8.0,
+       "score": 0.25536614656448364,
+       "state": "The white bowl rests on the sand, with palm trees behind it.",
+       "prediction": "The white bowl rests on the sand, with palm trees behind it.",
+       "trusted": true
+      },
+      {
+       "start": 7.0,
+       "end": 9.0,
+       "score": 0.25236010551452637,
+       "state": "The white bowl rests on the sand, with palm trees behind it.",
+       "prediction": "The white bowl rests on the sand, with palm trees behind it.",
+       "trusted": false
+      },
+      {
+       "start": 8.0,
+       "end": 10.0,
+       "score": 0.21465344727039337,
+       "state": "The white bowl rests on the sand with a gray rock to its right.",
+       "prediction": "The white bowl rests on the sand with a gray rock to its right.",
+       "trusted": true
+      },
+      {
+       "start": 9.0,
+       "end": 10.6,
+       "score": 0.15164822340011597,
+       "state": "The white bowl sits on the sand with a gray rock at its right.",
+       "prediction": "The light wooden block rests in the bowl.",
+       "trusted": false
+      }
+     ],
+     "lowest": 4,
+     "candidates": [
+      3,
+      4,
+      9
+     ],
+     "picks": [
+      3,
+      4,
+      9
+     ],
+     "shown": [
+      0,
+      4,
+      6
+     ],
+     "clips": {
+      "0": "media/1_timing_eval/solidity/impossible_w01.mp4",
+      "3": "media/1_timing_eval/solidity/impossible_w04.mp4",
+      "4": "media/1_timing_eval/solidity/impossible_w05.mp4",
+      "6": "media/1_timing_eval/solidity/impossible_w07.mp4",
+      "9": "media/1_timing_eval/solidity/impossible_w10.mp4"
+     },
+     "min_score": 0.07870036363601685,
+     "untrusted": 4,
+     "intervals": [
+      [
+       5.0,
+       6.0
+      ]
+     ]
+    }
+   },
+   "duration": 10.6,
+   "trial": "535a718ebd344858a07e78cb24bb6870"
+  }
+ ]
+}

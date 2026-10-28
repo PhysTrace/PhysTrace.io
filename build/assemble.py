@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the project page from template.html + <site_dir>/data.json (+ <site_dir>/orig.json if present).
+"""Assemble the project page from template.html + <site_dir>/2_diffusion_recon.json (+ <site_dir>/1_timing_eval.json if present).
 
   python3 assemble.py <site_dir>            -> <site_dir>/index.html (media referenced by relative path; deploy this folder)
   python3 assemble.py <site_dir> --inline   -> <site_dir>/../<name>_inline.html (single file, every mp4 embedded as data: URI)
@@ -12,8 +12,8 @@ if len(sys.argv) < 2:
 SITE = os.path.abspath(sys.argv[1])
 INLINE = "--inline" in sys.argv[2:]
 tpl = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
-data = json.load(open(os.path.join(SITE, "data.json"), encoding="utf-8"))
-ORIG_PATH = os.path.join(SITE, "orig.json")
+data = json.load(open(os.path.join(SITE, "2_diffusion_recon.json"), encoding="utf-8"))
+ORIG_PATH = os.path.join(SITE, "1_timing_eval.json")
 orig = json.load(open(ORIG_PATH, encoding="utf-8")) if os.path.exists(ORIG_PATH) else None
 
 
@@ -23,6 +23,7 @@ def inline(d):
     d = json.loads(json.dumps(d))
     for sc in d["scenes"]:
         sc["input"] = uri(sc["input"])
+        sc["possible"] = uri(sc["possible"])
         for r in sc["runs"].values():
             r["video"] = uri(r["video"])
             r["clips"] = {k: uri(v) for k, v in r["clips"].items()}

@@ -3,472 +3,1383 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PhysTrace</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="PhysTrace: interpretable temporal evaluation of physical consistency in video generative models.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,500,600,700&display=swap">
 <style>
-/* Layout: one reading column (max 1080px).
-   Section 1 (original videos): scene tabs -> Possible / Impossible players -> overlaid trace -> lowest-window clips.
-   Section 2 (reconstructions): scene tabs -> player + model overview -> detail trace -> 2 s window clips. */
+/* Academic project-page layout (Nerfies style): white title block -> alternating grey / white bands.
+   Bands: abstract (grey) -> teaser (white) -> method figure (grey) -> 1. IntPhys2 evaluation with a dataset panel (white)
+   -> 2. diffusion reconstructions (grey).
+   Data is injected at DATA / ORIG by build/assemble.py; every media path comes from that data, so --inline keeps working.
+   Series colors follow the validated dataviz reference palette: Possible / Wan = blue, Impossible = orange, Cosmos = aqua, UNet = tangerine. */
 :root {
-  --bg: #fbfbfa;
-  --surface: #ffffff;
-  --sunk: #f1f2f3;
-  --ink: #1b1f24;
-  --muted: #5c636b;
-  --faint: #a3a9b0;
-  --line: #dfe2e5;
-  --accent: #1f5f8b;
-  --accent-soft: #e3eef6;
-  --viol: #c8322b;
-  --viol-soft: rgba(200, 50, 43, .11);
-  --cand: #e08a1e;
-  --ok: #2f7d4f;
-  --ok-soft: #e2f1e8;
-  --bad-soft: #f9e4e2;
-  --f-display: "Literata", Georgia, "Times New Roman", serif;
-  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --page: #ffffff;
+  --band: #f5f5f5;
+  --card: #ffffff;
+  --card-soft: #fafafa;
+  --title: #363636;
+  --text: #4a4a4a;
+  --muted: #7a7a7a;
+  --line: #e6e6e6;
+  --chip: #e8e8e8;
+  --blue: #3273dc;
+  --blue-soft: #eaf1fc;
+  --dark: #363636;
+  --pos: #d2d2d2;
+  --pos-dot: #b9b9b9;
+  --imp: #eb6834;
+  --score: #385723;
+  --align: #3e7b4f;
+  --history: #3f7fc6;
+  --obs-title: #4a90d9; --obs-term: #1565d8;
+  --history-line: #9cc3ea;
+  --history-soft: #edf4fc;
+  --wan: #2a78d6;
+  --cos: #1baf7a;
+  --unet: #f0901f;
+  --cos-ink: #118f64;
+  --unet-ink: #b8650a;
+  --gt: #e34948;
+  --gt-soft: rgba(227, 73, 72, .10);
+  --good: #17803f;
+  --good-soft: #e2f2e7;
+  --bad: #c43a39;
+  --bad-soft: #fbe6e5;
+  --shadow: 0 2px 8px rgba(10, 10, 10, .08), 0 0 0 1px rgba(10, 10, 10, .02);
+  --f-title: "Google Sans", "Noto Sans", system-ui, sans-serif;
+  --f-body: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #14171a; --surface: #1b1f23; --sunk: #22272c; --ink: #e7e9eb; --muted: #9aa2aa; --faint: #5d656d; --line: #30363c;
-    --accent: #7db4dc; --accent-soft: #1e3242; --viol: #ef6b62; --viol-soft: rgba(239, 107, 98, .15);
-    --cand: #f0a446; --ok: #6cc596; --ok-soft: #1c3428; --bad-soft: #3a2220; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #14171a; --surface: #1b1f23; --sunk: #22272c; --ink: #e7e9eb; --muted: #9aa2aa; --faint: #5d656d; --line: #30363c;
-  --accent: #7db4dc; --accent-soft: #1e3242; --viol: #ef6b62; --viol-soft: rgba(239, 107, 98, .15);
-  --cand: #f0a446; --ok: #6cc596; --ok-soft: #1c3428; --bad-soft: #3a2220; color-scheme: dark;
-}
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
-.wrap { max-width: 1080px; margin: 0 auto; padding-block: 44px 72px;
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--page); color: var(--text); font: 16px/1.6 var(--f-body); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.container { max-width: 1120px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-header.paper { text-align: center; display: grid; gap: 12px; justify-items: center; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
-header.paper h1 { font-family: var(--f-display); font-weight: 650; font-size: clamp(25px, 3.6vw, 36px); line-height: 1.18; margin: 0; text-wrap: balance; max-width: 26ch; }
-header.paper h1 span { display: block; font-size: .62em; font-weight: 500; color: var(--muted); margin-top: 6px; }
-.authors { color: var(--muted); font-size: 14px; }
-.links { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.links .soon { font-size: 13px; font-weight: 500; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 5px 14px; }
-.links a { font-size: 13px; font-weight: 500; text-decoration: none; color: var(--ink); background: var(--sunk); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-section.qual { padding-top: 38px; display: grid; gap: 22px; }
-h2 { font-family: var(--f-display); font-weight: 600; font-size: 24px; margin: 0; }
-.lede { color: var(--muted); max-width: 72ch; margin: 6px auto 0; }
-.intro { text-align: center; }
-.lede b { color: var(--ink); font-weight: 600; }
-.eyebrow { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.narrow { max-width: 960px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.band { background: var(--band); }
+section.block { padding: 56px 0 64px; }
 
-.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-@media (max-width: 760px) { .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.tab { font: inherit; text-align: left; cursor: pointer; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
-  border-radius: 8px; padding: 9px 12px; display: grid; gap: 4px; min-width: 0; }
-.tab .attr { font: 500 10.5px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.tab .ttl { font-size: 14px; font-weight: 600; line-height: 1.3; }
-.tab .hm { display: flex; gap: 3px; align-items: center; font: 10.5px var(--f-mono); color: var(--muted); }
-.tab .hm i { width: 10px; height: 10px; border-radius: 2px; background: var(--line); }
-.tab .hm i.h { background: var(--ok); }
-.tab[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); }
+h2.section-title { margin: 0; text-align: center; font: 500 clamp(28px, 3.4vw, 36px)/1.2 var(--f-title); color: var(--title); }
+/* A subsection inside a numbered section: left-aligned with a short rule, smaller than the section title. */
+h3.sub-title { margin: 34px 0 0; display: flex; align-items: center; gap: 12px; font: 500 22px/1.25 var(--f-title); color: var(--title); }
+h3.sub-title::before { content: ""; width: 4px; height: 22px; border-radius: 2px; background: var(--blue); }
+h3.sub-title + .figure { margin-top: 16px; }
+h3.sub-title + .section-sub { margin: 8px 0 0; max-width: none; text-align: left; }
+.section-sub { margin: 8px auto 0; max-width: 820px; text-align: center; font-size: 17px; color: var(--text); }
+.section-sub b { color: var(--title); font-weight: 600; }
 
-.scene { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 22px; align-items: start; }
-@media (max-width: 820px) { .scene { grid-template-columns: 1fr; } }
-.video { display: grid; gap: 8px; min-width: 0; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; justify-self: start; }
-.seg button { font: 500 12.5px var(--f-body); background: var(--surface); color: var(--muted); border: 0; padding: 5px 12px; cursor: pointer; }
-.seg button + button { border-left: 1px solid var(--line); }
-.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); }
-.player { position: relative; aspect-ratio: 1 / 1; max-width: 100%; max-height: 440px; border-radius: 8px; overflow: hidden; background: #0e1013; }
-.player video { width: 100%; height: 100%; object-fit: contain; display: block; }
-.player .tag { position: absolute; left: 10px; top: 10px; font: 500 11px var(--f-mono); background: rgba(0, 0, 0, .55); color: #fff; padding: 3px 8px; border-radius: 4px; }
-.timeline { position: relative; height: 22px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
-.timeline .band { position: absolute; top: 0; bottom: 0; background: var(--viol-soft); border-left: 2px solid var(--viol); border-right: 2px solid var(--viol); }
-.timeline .win { position: absolute; top: 3px; height: 16px; border: 1.5px solid var(--accent); border-radius: 3px; }
-.timeline .win b { position: absolute; top: 0; left: 3px; font: 500 9.5px var(--f-mono); color: var(--accent); }
-.timeline .head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
-.ticks { display: flex; justify-content: space-between; font: 11px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.desc { font-size: 13.5px; color: var(--muted); margin: 2px 0 0; }
-.desc b { color: var(--ink); font-weight: 600; }
+/* ---- title block ---- */
+.hero { padding: 64px 0 40px; text-align: center; }
+.hero h1 { margin: 0 auto; max-width: 940px; font: 500 clamp(30px, 4.4vw, 48px)/1.18 var(--f-title); color: var(--title); text-wrap: balance; }
+.hero h1 .name { color: var(--blue); }
+.authors { margin-top: 22px; font: 400 19px/1.5 var(--f-title); color: var(--text); }
+.affil { font: 400 16px/1.5 var(--f-title); color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+.pill-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--dark); color: #fff; border-radius: 999px; padding: 8px 18px 8px 15px;
+  font: 400 16px/1.2 var(--f-body); text-decoration: none; white-space: nowrap; }
+.pill-btn:hover { background: #1f1f1f; text-decoration: none; }
+.pill-btn svg { width: 16px; height: 16px; flex: none; }
+.pill-btn.soon { background: #8a8a8a; cursor: default; }
+.pill-btn.soon small { font-size: 12px; opacity: .85; }
+.teaser-fig { margin: 0 auto; max-width: 1080px; }
+.teaser-fig img { display: block; width: 100%; height: auto; }
+.abstract { margin: 18px 0 0; font-size: 16.5px; line-height: 1.7; text-align: justify; color: var(--text); }
+.abstract em { font-style: normal; font-weight: 600; color: var(--title); }
+@media (max-width: 560px) { .abstract { text-align: left; } }
 
-.side { display: grid; gap: 10px; min-width: 0; }
-.grid4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.cell { font: inherit; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
-  padding: 8px 10px 4px; display: grid; gap: 2px; color: var(--ink); min-width: 0; }
-.cell[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.cell .hd { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-.cell .hd span { font-family: var(--f-mono); font-weight: 400; color: var(--muted); margin-right: auto; }
-.pill { font: 600 10.5px var(--f-mono); letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
-.pill.hit { background: var(--ok-soft); color: var(--ok); }
-.pill.miss { background: var(--bad-soft); color: var(--viol); }
-.grid4 svg { width: 100%; height: auto; display: block; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
-.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
-.legend .sw { width: 14px; height: 9px; border-radius: 2px; }
+/* ---- IntPhys2 dataset panel (opened from the evaluation section) ---- */
+.about-row { display: flex; justify-content: center; margin-top: 16px; }
+.outline-btn { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: 1.5px solid var(--blue); color: var(--blue); background: #fff;
+  border-radius: 999px; padding: 6px 16px; font-size: 15px; }
+.outline-btn:hover { background: var(--blue-soft); }
+.outline-btn svg { width: 14px; height: 14px; transition: transform .2s ease; }
+.outline-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.about { margin: 16px auto 0; max-width: 1000px; background: var(--card-soft); border-radius: 14px; box-shadow: var(--shadow); padding: 18px 20px 20px; }
+.about p { margin: 0 0 14px; font-size: 15.5px; }
+.about p b { color: var(--title); }
+.teaser { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .teaser { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+.tshot { display: grid; grid-template-rows: auto 1fr; align-content: start; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: var(--shadow); cursor: pointer; text-align: left; min-width: 0; }
+.tshot .media { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #000; }
+.tshot video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.tshot .media span { position: absolute; left: 8px; top: 8px; font: 700 10.5px var(--f-body); letter-spacing: .05em; text-transform: uppercase; color: #fff;
+  background: var(--imp); padding: 3px 8px; border-radius: 4px; }
+.tshot .lab { padding: 8px 10px 10px; display: grid; gap: 2px; align-content: start; }
+.tshot .lab b { font: 500 16px var(--f-title); color: var(--title); text-transform: capitalize; }
+.tshot .lab .rule { font-size: 13px; color: var(--text); line-height: 1.4; }
+.tshot .lab .scn { font-size: 12.5px; color: var(--muted); }
 
-.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
-.detail-hd { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 14px; align-items: center; }
-.detail-hd h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 19px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.verdict { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.chart-big { overflow-x: auto; }
-.chart-big svg { width: 100%; min-width: 540px; height: auto; display: block; }
+/* ---- method figure: the source video beside its trace, then one window as a concept ---- */
+.figure { margin-top: 28px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px 20px; display: grid; gap: 16px; }
+.fig-top { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .fig-top { grid-template-columns: 1fr; } }
+.fig-src { display: grid; gap: 8px; align-content: start; }
+.fig-src .thumb { position: relative; width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #000; }
+.fig-src video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fig-src .chip { position: absolute; left: 8px; top: 8px; font: 700 10.5px var(--f-body); letter-spacing: .05em; color: #fff;
+  background: var(--gt); padding: 3px 8px; border-radius: 4px; }
+.fig-src .what { display: grid; gap: 1px; text-align: center; }
+.fig-src .what > span { font-size: 12.5px; color: var(--muted); }
+.fig-src .change { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.fig-src .change span { display: inline-flex; align-items: center; gap: 5px; }
+.fig-src .change i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .18); }
+.fig-src .change em { font-style: normal; color: var(--muted); margin: 0 3px; }
+.fig-src .what b { display: block; font: 500 15px var(--f-title); color: var(--title); }
+.fig-plot { display: grid; gap: 6px; min-width: 0; }
+.fig-plot h4 { margin: 0; font: 500 16px var(--f-title); color: var(--title); }
+.fig-legend { justify-content: flex-start; }
+.fig-trace svg { display: block; width: 100%; height: auto; }
+.fig-trace .t-axis { font: 11px var(--f-mono); fill: var(--muted); }
+.fig-trace .t-span { fill: #6e6e6e; opacity: .11; }
+.fig-trace .playhead { stroke: var(--title); stroke-width: 1; opacity: .35; }
 
-.windows { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.wcard { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: auto auto 1fr; background: var(--bg); min-width: 0; }
-.wcard.in { border-color: var(--viol); }
-.clip { position: relative; aspect-ratio: 1 / 1; max-width: 100%; background: #0e1013; }
+.concept { position: relative; border-top: 1px solid var(--line); padding: 40px 0 46px; }
+/* The two inputs (window video + memory) side by side in one group, the MLLM, then its two outputs stacked.
+   Every connector is drawn by drawConceptLoop from the laid-out boxes. */
+.c-grid { display: grid; align-items: center; row-gap: 10px;
+  grid-template-columns: auto minmax(40px, 1fr) 112px minmax(40px, 1fr) minmax(0, 380px); }
+.c-in { grid-column: 1; grid-row: 1 / span 2; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1.5px dashed #d0d0d0; border-radius: 16px; }
+.c-plus { font: 500 22px var(--f-title); color: var(--muted); }
+.c-mllm { grid-column: 3; grid-row: 1 / span 2; }
+.c-exp { grid-column: 5; grid-row: 1; }
+.c-obs { grid-column: 5; grid-row: 2; }
+.c-box { border-radius: 12px; padding: 8px 12px; display: grid; gap: 4px; min-width: 0; }
+.c-box h4 { margin: 0; font: 700 14px var(--f-title); color: var(--title); }
+.c-win { background: #f4f4f4; border: 2px solid; justify-items: center; padding: 6px 8px 8px; }
+.c-win .thumb { width: 120px; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #000; }
+.c-win img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.c-win .thumb { position: relative; }
+.c-win .mark { position: absolute; width: 0; height: 0; pointer-events: none; }
+.c-win .mark i { position: absolute; left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid #fff;
+  box-shadow: 0 0 0 2px var(--imp), 0 0 10px rgba(0, 0, 0, .35); }
+.c-win .mark b { position: absolute; right: 16px; top: -32px; white-space: nowrap; font: 700 10.5px var(--f-body); color: #fff; background: var(--imp);
+  padding: 2px 7px; border-radius: 999px; }
+.c-win .when { font: 500 11px var(--f-mono); color: var(--muted); margin-left: 4px; }
+.c-mem { width: 270px; align-self: stretch; align-content: center; background: var(--history-soft); border: 2px solid var(--history-line); }
+.c-mem ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+/* Each history entry: a window badge, then its observed state, so the badge never reads as part of the sentence. */
+.c-mem li { display: flex; align-items: flex-start; gap: 8px; background: #fff; border-radius: 8px; padding: 5px 8px; font-size: 12.5px; line-height: 1.35; color: var(--title); }
+.c-mem li b { flex: none; margin-top: 1px; font: 700 10.5px/1.5 var(--f-mono); color: #fff; background: var(--history); border-radius: 5px; padding: 0 6px; }
+.c-mllm { align-self: stretch; align-content: center; justify-items: center; text-align: center; gap: 2px; background: #eef2ff; border: 2px solid #b4c3f3; padding: 12px 6px 10px; }
+.c-mllm .robot { width: 50px; height: 50px; }
+.c-mllm h4 { color: #3b5bdb; font: 700 15px var(--f-title); letter-spacing: .04em; }
+/* Expected and observed share one shape and type; only the expected state is filled. */
+.c-state { border: 2.5px solid; }
+.c-state p { margin: 0; font: 500 15px/1.35 var(--f-title); color: var(--title); }
+.c-exp { background: #eef7e3; }
+/* Blue like the selected history it may join; outlined only, so the filled expected state stays the focus. */
+.c-obs { background: #fff; border-color: var(--history-line); }
+.c-state .note { display: none; font-size: 12.5px; font-weight: 600; }
+.c-exp .note { color: var(--align); }
+.hl { font-weight: 800; }
+.c-obs .note { color: var(--history); }
+/* The two sides of the alignment score share its green outline. */
+.c-exp, .c-win { border-color: var(--align); box-shadow: 0 0 0 3px rgba(62, 123, 79, .14); }
+.c-loop { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.c-loop .trusted { font: 600 12px var(--f-body); fill: var(--history); }
+.c-loop .sim-pill rect { fill: var(--align); }
+.c-loop .sim-pill text { font: 600 12.5px var(--f-body); fill: #fff; }
+@media (max-width: 900px) {
+  .concept { padding: 18px 0 0; }
+  .c-grid { grid-template-columns: 1fr; }
+  .c-grid > * { grid-column: 1; grid-row: auto; }
+  .c-in { flex-wrap: wrap; justify-content: center; }
+  .c-mem { width: 100%; }
+  .c-loop { display: none; }
+  .c-state .note { display: block; }
+}
+.fig-caption { margin: 14px auto 0; max-width: 900px; text-align: center; font-size: 15px; color: var(--text); }
+.fig-caption b { color: var(--title); }
+
+/* ---- shared: arrow tabs, video cards, timelines ---- */
+.nav-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 26px 0 18px; }
+.circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--blue); background: #fff; color: var(--blue); cursor: pointer;
+  display: grid; place-items: center; flex: none; padding: 0; }
+.circle:hover { background: var(--blue-soft); }
+.circle svg { width: 16px; height: 16px; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.pill { border: 0; cursor: pointer; border-radius: 999px; padding: 7px 16px; background: var(--chip); color: #666; font-size: 15px; text-transform: capitalize; }
+.pill:hover { background: #dcdcdc; }
+.pill[aria-selected="true"] { background: var(--blue); color: #fff; }
+@media (max-width: 560px) { .pill { font-size: 13.5px; padding: 6px 12px; } .nav-row .circle { display: none; } }
+
+.compare { background: var(--card-soft); border-radius: 14px; box-shadow: var(--shadow); padding: 22px 20px 20px; }
+.band .compare { background: var(--card); }
+@media (max-width: 560px) { .compare { padding: 14px 10px; } }
+/* Section 2 shows five videos in a row, so its card reaches past the 1120px column, up to 1260px or the viewport. */
+#diffusion .compare { --wide: min(1260px, calc(100vw - 48px)); margin-inline: min(0px, calc((100% - var(--wide)) / 2)); }
+
+.vrow { display: grid; gap: 14px; }
+.vrow.two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; margin: 0 auto; }
+.vrow.three { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; }
+@media (max-width: 620px) { .vrow { gap: 8px; } }
+.vcard { display: grid; padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; background: #f4f4f4; box-shadow: var(--shadow); text-align: center; min-width: 0; }
+button.vcard { cursor: pointer; }
+.vcard .screen { position: relative; aspect-ratio: 1; background: #000; }
+.vcard video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vcard .cap { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 7px 8px; font: 500 14px/1.3 var(--f-body); color: var(--text); }
+.vcard[aria-pressed="true"] { border-color: var(--blue); }
+.vcard[aria-pressed="true"] .cap { background: var(--blue); color: #fff; }
+.vcard .corner { position: absolute; right: 8px; top: 8px; font: 500 11.5px var(--f-mono); color: #fff; background: rgba(0, 0, 0, .55); padding: 2px 7px; border-radius: 4px; }
+.vcard .strip { margin: 8px 8px 0; }
+@media (max-width: 620px) { .vcard .cap { font-size: 12px; padding: 5px 4px; gap: 4px; } .vcard .corner { font-size: 10px; right: 4px; top: 4px; } }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
+/* Diffusion players: two groups side by side, the originals (Possible / Impossible) and the --n reconstructions,
+   each under a grey band, split by a divider. Flex grow 2 : n keeps every video the same width. */
+.recon-row { display: flex; align-items: stretch; gap: 22px; max-width: calc(270px * (var(--n) + 2)); margin: 0 auto; }
+.recon-row .vgroup { display: grid; grid-template-rows: auto auto 1fr; gap: 6px; min-width: 0; flex: 2 1 0; }
+.recon-row .vgroup.recon { flex-grow: var(--n); }
+.recon-row .vgroup .cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 14px; grid-row: 2 / 4; }
+.recon-row .divider { flex: none; width: 1px; background: var(--line); }
+.recon-row .vcol { display: grid; grid-template-rows: auto 1fr; gap: 6px; min-width: 0; }
+.recon-row .vcard:not(button) { padding-bottom: 8px; align-content: start; }
+.recon-row .group-band { margin: 0; min-height: 26px; display: flex; align-items: center; justify-content: center; background: #f5f5f5; border-radius: 8px;
+  font: 600 14px/1.3 var(--f-body); letter-spacing: .01em; color: #6f6f6f; white-space: nowrap; }
+.recon-row .vname { margin: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font: 700 clamp(15px, 1.4vw, 18px)/1.3 var(--f-body); color: var(--title); white-space: nowrap; min-width: 0; }
+.recon-row .vname > span { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 620px) {
+  .recon-row { flex-direction: column; gap: 14px; }
+  .recon-row .divider { display: none; }
+  .recon-row .vgroup .cols { gap: 8px; }
+  .recon-row .vgroup:not(.recon) .cols { width: min(100%, 300px); justify-self: center; }
+  .recon-row .vname { font-size: 13.5px; gap: 5px; }
+  .recon-row .group-band { font-size: 12.5px; min-height: 26px; }
+}
+
+.strip { position: relative; height: 8px; border-radius: 999px; background: #e3e3e3; overflow: hidden; }
+.strip .gtb { position: absolute; top: 0; bottom: 0; background: rgba(227, 73, 72, .28); }
+.strip .det { position: absolute; top: 2px; bottom: 2px; border-radius: 999px; }
+.strip .head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--title); }
+.scene-desc { margin: 16px auto 0; max-width: 760px; text-align: center; font-size: 15px; }
+.scene-desc b { color: var(--title); }
+.scene-desc .mono { font-size: 12.5px; color: var(--muted); }
+/* The IntPhys2 scene id, centred above the two videos. */
+/* Under the IntPhys2 video pair: left-aligned and as wide as the pair. */
+.scene-desc.left { max-width: 640px; text-align: left; }
+.scene-id-title { margin: 0 0 14px; text-align: center; font: 700 16px var(--f-body); color: var(--title); overflow-wrap: anywhere; }
+
+.status { display: inline-flex; align-items: center; gap: 4px; font: 700 11px/1 var(--f-body); letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 8px 4px 6px; white-space: nowrap; }
+.status svg { width: 11px; height: 11px; }
+.status.hit { background: var(--good-soft); color: var(--good); }
+.status.miss { background: var(--bad-soft); color: var(--bad); }
+
+/* ---- chart ---- */
+.chart-card { margin-top: 22px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 16px 18px 14px; display: grid; gap: 10px; }
+.chart-hd { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.chart-hd h4 { margin: 0; font: 500 19px/1.3 var(--f-title); color: var(--title); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verdict { font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend [hidden] { display: none; }
+.sw { display: inline-block; width: 16px; height: 3px; border-radius: 2px; flex: none; }
+.sw.faint { opacity: .35; }
+/* Section-2 legend: model names only, bold and dark, tucked at the bottom right under the plot. */
+#d-legend { justify-content: flex-end; gap: 6px 22px; font: 700 14.5px var(--f-body); color: var(--title); }
+#d-legend .sw { width: 22px; height: 4px; }
+.sw.ring { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); }
+.sw.band { width: 14px; height: 10px; border-radius: 2px; background: var(--gt-soft); border: 1px dashed var(--gt); }
+.sw.bar { height: 5px; }
+.hint { font-size: 12.5px; color: var(--muted); }
+.chart { position: relative; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.chart .axis { font: 11px var(--f-mono); fill: var(--muted); }
+.gt-pill rect { fill: #fbe1e1; stroke: rgba(227, 73, 72, .35); stroke-width: 1; }
+.gt-pill text { font: 600 11.5px var(--f-body); fill: #b03434; }
+.callout rect { fill: #2b2b2b; }
+.detected-badge line { stroke: var(--gt); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.detected-badge .ring { fill: none; stroke: var(--gt); stroke-width: 2; }
+.detected-badge rect { fill: #fff; stroke: var(--gt); stroke-width: 1.5; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .12)); }
+.detected-badge .icon { fill: var(--gt); }
+.detected-badge .icon-mark { font: 800 8.5px var(--f-body); fill: #fff; }
+.detected-badge .title { font: 700 11.5px var(--f-body); fill: var(--gt); }
+.callout text { font: 600 11.5px var(--f-mono); fill: #fff; }
+.chart .grid { stroke: #ededed; stroke-width: 1; stroke-dasharray: 2 4; }
+.chart .playhead { stroke: var(--title); stroke-width: 1; opacity: .35; }
+.chart .guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.tip { position: absolute; top: 0; pointer-events: none; background: #2b2b2b; color: #fff; border-radius: 8px; padding: 8px 10px;
+  font-size: 12.5px; line-height: 1.45; min-width: 160px; box-shadow: var(--shadow); opacity: 0; transition: opacity .1s; z-index: 2; }
+.tip.on { opacity: 1; }
+.tip .th { font: 600 12px var(--f-mono); margin-bottom: 4px; }
+.tip .tr { display: flex; align-items: center; gap: 7px; }
+.tip .tr b { margin-left: auto; font: 500 12px var(--f-mono); }
+.tip .flag { margin-top: 4px; font-size: 11.5px; opacity: .8; }
+
+.seg { display: inline-flex; gap: 6px; }
+.seg button { cursor: pointer; border: 0; border-radius: 999px; padding: 5px 14px; background: var(--chip); color: #666; font-size: 14px; display: inline-flex; align-items: center; gap: 7px; }
+.seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+/* Section-2 model buttons and players wear their model color instead of the shared blue. */
+.seg button.model-btn { color: var(--c); background: color-mix(in srgb, var(--c) 11%, #fff); font-weight: 600; }
+.seg button.model-btn[aria-pressed="true"] { background: var(--c); color: #fff; }
+/* Selection shows on the frame only (model-color border and soft glow); the caption keeps its badge as is. */
+#d-players .vcard[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 0 1px var(--c), 0 6px 18px color-mix(in srgb, var(--c) 30%, transparent); }
+#d-players .vcard[aria-pressed="true"] .cap { background: none; color: inherit; }
+/* Reconstruction captions: an icon plus colored text, no fill. Impossible is a red cross (kept off the tangerine
+   UNet), Possible a leaf-green check, yellower than the Cosmos aqua; the icon keeps them apart without color. */
+#d-players .side-name { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 13.5px; letter-spacing: .01em; }
+#d-players .side-name svg { width: 15px; height: 15px; flex: none; }
+#d-players .side-name[data-side="impossible"] { color: #c62828; }
+#d-players .side-name[data-side="possible"] { color: #2e7d32; }
+
+/* ---- window cards; in the IntPhys2 section they hang under the chart, tied to their points by dashed links ---- */
+.linked { position: relative; }
+.linked-cards { margin-top: 18px; }
+/* IntPhys2 windows stack as rows: the clip on the left, its states on the right with room for full sentences. */
+:is(#i-windows, #d-windows) { grid-template-columns: 1fr; gap: 12px; }
+:is(#i-windows, #d-windows) { max-width: 900px; margin-left: auto; margin-right: auto; }
+:is(#i-windows, #d-windows) .wcard { grid-template-columns: 172px minmax(0, 1fr); grid-template-rows: auto; align-items: center; }
+:is(#i-windows, #d-windows) .clip { align-self: stretch; aspect-ratio: 1; }
+:is(#i-windows, #d-windows) .wbody { padding: 12px 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: center; }
+:is(#i-windows, #d-windows) .says { display: grid; gap: 16px; }
+:is(#i-windows, #d-windows) .say p { font-size: 15px; }
+/* Each sentence holds at least two lines, so the Observed state title sits at the same height on every card. */
+:is(#i-windows, #d-windows) .say p { min-height: 3em; }
+/* The state titles read as headings above their sentences: uppercase and heavy, close to the text size. */
+:is(#i-windows, #d-windows) .say .k { font-size: 13.5px; font-weight: 800; letter-spacing: .04em; }
+/* The score sits right of the states, reading as the result of comparing them with the clip. */
+:is(#i-windows, #d-windows) .wscore.side { display: grid; justify-items: end; gap: 0; padding-left: 20px; border-left: 1px solid var(--line); }
+:is(#i-windows, #d-windows) .wscore.side span { font: 600 10.5px var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+:is(#i-windows, #d-windows) .wscore.side b { font: 500 24px var(--f-title); }
+:is(#i-windows, #d-windows) .detected .wscore.side b { color: var(--gt); }
+@media (max-width: 560px) {
+  :is(#i-windows, #d-windows) .wcard { grid-template-columns: 124px minmax(0, 1fr); }
+  :is(#i-windows, #d-windows) .wbody { padding: 10px 12px; grid-template-columns: 1fr; }
+  :is(#i-windows, #d-windows) .wscore.side { justify-items: start; padding: 6px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  :is(#i-windows, #d-windows) .say p { font-size: 14px; }
+  :is(#i-windows, #d-windows) .say .k { font-size: 12.5px; }
+}
+/* Both sections lay the three cards side by side: clip on top, the two states, then the score as a footer row.
+   Both use the same clip and text sizes. */
+:is(#i-windows, #d-windows) { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; gap: 16px; }
+:is(#i-windows, #d-windows) .wcard { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; align-items: stretch; }
+/* Above the clip: the window name in the top-left corner (styled like the method figure's history tags) and, on the
+   detected window, DETECTED in the top-right corner of the same row. */
+:is(#i-windows, #d-windows) .card-tags { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 21px; padding: 12px 14px 0; }
+:is(#i-windows, #d-windows) .card-tags b { font: 700 13px/1.6 var(--f-mono); color: #fff; background: var(--history); border-radius: 6px; padding: 0 8px; }
+:is(#i-windows, #d-windows) .card-tags .det { font: 700 11px/1.9 var(--f-body); letter-spacing: .08em; color: #fff; background: var(--gt); border-radius: 6px; padding: 0 8px; }
+:is(#i-windows, #d-windows) .clip { aspect-ratio: 1; width: min(100% - 32px, 230px); justify-self: center; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+:is(#i-windows, #d-windows) .wbody { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; gap: 12px; padding: 14px 16px 12px; align-items: start; }
+:is(#i-windows, #d-windows) .says { gap: 12px; }
+/* Section 2 cards are wider (its card spans up to 1260px), so their clips can be a little larger. */
+#d-windows .clip { width: min(100% - 32px, 270px); }
+:is(#i-windows, #d-windows) .say p { font-size: 16.5px; }
+/* Each sentence is indented under its title, so it reads as the item under that heading. */
+:is(#i-windows, #d-windows) .say p { padding-left: 12px; }
+:is(#i-windows, #d-windows) .say .k { font-size: 14px; }
+:is(#i-windows, #d-windows) .wscore.side { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+:is(#i-windows, #d-windows) .wscore.side b { font-size: 22px; }
+@media (max-width: 760px) { :is(#i-windows, #d-windows) { grid-template-columns: minmax(0, 1fr); } }
+.wcard[data-mark]:hover { box-shadow: 0 0 0 2px var(--blue), var(--shadow); }
+.sw.tag { width: auto; height: auto; background: #fff; border: 1.5px solid var(--imp); border-radius: 999px; padding: 0 6px; font: 600 10.5px var(--f-mono); color: var(--title); }
+.chart .mark .span { fill: var(--blue); opacity: 0; transition: opacity .15s ease; }
+.chart .mark.on .span { opacity: .1; }
+.chart .mark-pill rect { fill: #fff; stroke-width: 1.5; }
+.chart .mark-pill text { font: 600 11px var(--f-mono); fill: var(--title); }
+.chart .mark.on .mark-pill rect { fill: var(--blue); stroke: var(--blue); }
+.chart .mark.on .mark-pill text { fill: #fff; }
+.windows-hd { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 16px; margin: 30px 0 14px; text-align: center; }
+.windows-hd h4 { margin: 0; font: 500 20px var(--f-title); color: var(--title); }
+.windows { display: grid; gap: 14px; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); }
+@media (max-width: 900px) { .windows { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.wcard { background: var(--card); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; display: grid; grid-template-rows: auto 1fr; border: 2px solid transparent; min-width: 0; }
+.wcard.flag { border-color: color-mix(in srgb, var(--gt) 50%, transparent); }
+.clip { position: relative; aspect-ratio: 1; background: #000; }
 .clip video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.clip .badge { position: absolute; left: 8px; top: 8px; font: 500 10.5px var(--f-mono); color: #fff; background: rgba(0, 0, 0, .55); padding: 2px 7px; border-radius: 3px; }
-.clip .role { position: absolute; right: 8px; top: 8px; font: 600 10px var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: #fff; padding: 2px 7px; border-radius: 3px; }
-.clip .role.lo { background: var(--viol); }
-.clip .role.gt { background: rgba(200, 50, 43, .7); }
-.wmeta { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 12px 0; gap: 8px; }
-.wmeta b { font: 500 12.5px var(--f-mono); font-variant-numeric: tabular-nums; }
-.score { font: 500 12px var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
-.wcard.lo .score { color: var(--viol); }
-dl { margin: 0; padding: 8px 12px 12px; display: grid; gap: 8px; align-content: start; }
-dt { font: 500 10.5px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; gap: 6px; align-items: center; }
-dt em { font-style: normal; letter-spacing: 0; text-transform: none; color: var(--faint); }
-dt em.diff { color: var(--viol); }
-dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
-.note { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; max-width: 90ch; }
-/* Section 2: original IntPhys2 videos (Possible / Impossible pairs, no generative model). */
-section.qual + section.qual { margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--line); }
-.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-@media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
-.pair .video { gap: 6px; }
-.pair .player { max-height: none; }
-.player .tag.pos { background: var(--ok); }
-.player .tag.imp { background: var(--viol); }
-.player .min { position: absolute; right: 10px; top: 10px; font: 500 11px var(--f-mono); background: rgba(0, 0, 0, .55); color: #fff; padding: 3px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }
-.tab .mins { font: 10.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.tab .mins b { color: var(--viol); font-weight: 500; }
-.legend .ln { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--accent); vertical-align: middle; }
-.legend .ln.twin { border-top: 2px dashed var(--faint); }
-.twin { font: 11.5px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; padding: 0 12px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.clip .tagline { position: absolute; left: 8px; top: 8px; font: 500 11px var(--f-mono); color: #fff; background: rgba(0, 0, 0, .55); padding: 2px 7px; border-radius: 4px; }
+.clip .role { position: absolute; left: 8px; bottom: 8px; font: 700 10.5px var(--f-body); letter-spacing: .05em; text-transform: uppercase; color: #fff;
+  background: var(--gt); padding: 3px 8px; border-radius: 4px; }
+.clip .role.soft { background: #a33a35; }
+.clip .role.plain { background: rgba(0, 0, 0, .6); }
+.clip .chips { position: absolute; left: 8px; bottom: 8px; right: 8px; display: flex; flex-wrap: wrap-reverse; gap: 4px; }
+.clip .chips span { font: 700 10.5px var(--f-body); letter-spacing: .04em; color: #fff; background: rgba(0, 0, 0, .6); padding: 3px 8px; border-radius: 4px; }
+.clip .chips .det { background: var(--gt); letter-spacing: .08em; }
+.wcard.detected { border: 3px solid var(--gt); box-shadow: 0 0 0 3px rgba(227, 73, 72, .15), var(--shadow); }
+/* The Impossible video's expected state is what the score checks, so its title wears the score's orange. */
+.say .k.exp-title { color: var(--imp); font-weight: 800; font-size: 11.5px; }
+.say .k.obs-title { color: var(--obs-title); font-weight: 800; font-size: 11.5px; }
+.wbody { padding: 10px 12px 12px; display: grid; gap: 8px; align-content: start; }
+.wscore { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.wscore b { font: 500 20px var(--f-title); color: var(--title); font-variant-numeric: tabular-nums; }
+.wscore span { font-size: 12.5px; color: var(--muted); }
+.say { display: grid; gap: 2px; }
+.say .k { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font: 600 10.5px var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.say .k .diff { letter-spacing: 0; text-transform: none; font-weight: 600; color: var(--gt); background: var(--gt-soft); border-radius: 4px; padding: 0 6px; }
+.say .k .same { letter-spacing: 0; text-transform: none; font-weight: 400; }
+.say p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--title); }
+@media (max-width: 560px) {
+  .windows { grid-template-columns: 1fr; }
+  .wcard { grid-template-columns: 128px minmax(0, 1fr); grid-template-rows: auto; }
+  .clip { align-self: start; }
+  .clip .tagline { font-size: 9.5px; left: 4px; top: 4px; padding: 1px 4px; }
+  .clip .role { left: 4px; bottom: 4px; font-size: 9.5px; }
+}
+/* Left-aligned under the card row and inset by the compare box's padding, so it spans the same width as the cards. */
+.note { margin: 18px 20px 0; font-size: 14.5px; line-height: 1.6; color: var(--text); text-align: left; }
+@media (max-width: 560px) { .note { margin: 14px 10px 0; } }
+.note b { color: var(--title); }
+/* The video label in its own column, so the description wraps beside it and never under it. */
+.note.labeled { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline; }
+.note .note-label { white-space: nowrap; }
+@media (max-width: 560px) { .note.labeled { grid-template-columns: 1fr; } }
+
+/* ---- summary blocks ---- */
+.summary { margin: 40px auto 0; max-width: 760px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 16px 20px; display: grid; gap: 10px; }
+.summary h4 { margin: 0; font: 500 18px var(--f-title); color: var(--title); text-align: center; }
+.summary .legend { justify-content: center; }
+table.matrix { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.matrix th { font: 500 14px var(--f-title); color: var(--title); text-align: left; padding: 0 10px 8px; }
+.matrix th .dot { margin-right: 6px; }
+.matrix td { padding: 8px 10px; border-top: 1px solid var(--line); }
+.matrix tbody tr { cursor: pointer; }
+.matrix tbody tr:hover td, .matrix tbody tr[aria-current="true"] td { background: #f3f3f3; }
+.matrix td .lab { display: block; font-size: 12px; color: var(--muted); text-transform: capitalize; }
+.matrix tfoot td { font: 500 13px var(--f-mono); color: var(--text); }
+
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 </style>
 
-<div class="wrap">
-  <header class="paper">
-    <h1>PhysTrace<span>Interpretable Temporal Evaluation of Physical Consistency in Video Generative Models</span></h1>
-    <div class="authors">Authors to be added</div>
+<header class="hero">
+  <div class="container">
+    <h1><span class="name">PhysTrace</span>: Interpretable Temporal Evaluation of Physical Consistency in Video Generative Models</h1>
+    <div class="authors">Anonymous</div>
+    <div class="affil">Anonymous Institution</div>
     <nav class="links" aria-label="Paper links">
-      <span class="soon" aria-disabled="true">Paper · coming soon</span><a href="https://github.com/PhysTrace/PhysTrace" target="_blank" rel="noopener">Code</a><span class="soon" aria-disabled="true">IntPhys2-Timing · coming soon</span>
+      <span class="pill-btn soon" aria-disabled="true">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 1h5.5L13 4.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1Zm5 1.5V5h2.5L9 2.5ZM5 8v1h6V8H5Zm0 2.5v1h6v-1H5Z"/></svg>
+        Paper <small>(coming soon)</small></span>
+      <span class="pill-btn soon" aria-disabled="true">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        Code <small>(coming soon)</small></span>
     </nav>
-  </header>
+  </div>
+</header>
 
-  <section class="qual orig" id="orig">
-    <div class="intro">
-      <div class="eyebrow">Original videos · IntPhys2 Possible / Impossible pairs</div>
-      <h2>Can it find the violation in a real video?</h2>
-      <p class="lede">No generative model is involved here. PhysTrace runs directly on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the video: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. When the history says an object should be there and the frames disagree, prediction and state split and the score drops. The impossible video falls to a much lower minimum than its possible twin.</p>
-    </div>
+<section class="block band" id="abstract">
+  <div class="container narrow">
+    <h2 class="section-title">Abstract</h2>
+    <p class="abstract">World action models increasingly rely on pretrained video models assumed to capture physical dynamics for prediction, planning, and action generation. Existing evaluations assess plausibility, probe representations, or measure predictive surprise, but rarely identify which history-conditioned physical expectations conflict with observations. We introduce <em>PhysTrace</em>, a training-free framework aligning MLLM-generated, history-conditioned expectations with observed video windows to temporally localize physical violations and provide interpretable descriptions without task-specific probes or classifiers. We also introduce <em>IntPhys2-Timing</em>, adding violation intervals to IntPhys2. PhysTrace achieves a Hit Rate of up to 70.7% across physical principles on IntPhys2-Timing and outperforms the compared methods in overall possible&ndash;impossible discrimination accuracy on IntPhys2. Applied to reconstructed videos along the trajectories of pretrained diffusion/flow-based video models, PhysTrace reveals attribute- and noise-dependent patterns in physical violation localization, enabling interpretable physical consistency analysis across timesteps.</p>
+  </div>
+</section>
 
-    <div class="tabs" role="tablist" id="otabs"></div>
+<section class="block" id="teaser-figure">
+  <div class="container">
+    <figure class="teaser-fig">
+      <a href="media/figure/fig1.pdf" target="_blank" rel="noopener" aria-label="Open the teaser figure as PDF"><img src="media/figure/fig1.png" width="2667" height="1136" alt="Representation probing and MLLM judgment compared with PhysTrace, which aligns history-conditioned expected states with each video window to localize physical violations."></a>
+    </figure>
+  </div>
+</section>
 
-    <div class="pair">
-      <div class="video">
-        <div class="player"><video id="opos" muted loop autoplay playsinline></video><span class="tag pos">Possible</span><span class="min" id="opmin"></span></div>
-        <div class="timeline" id="optl" aria-hidden="true"></div>
-      </div>
-      <div class="video">
-        <div class="player"><video id="oimp" muted loop autoplay playsinline></video><span class="tag imp">Impossible</span><span class="min" id="oimin"></span></div>
-        <div class="timeline" id="oitl" aria-hidden="true"></div>
-      </div>
-    </div>
-    <p class="desc" id="odesc" style="margin-top:-8px"></p>
+<section class="block band" id="intphys">
+  <div class="container">
+    <h2 class="section-title">1. Temporal Localization of Physical Violations on IntPhys2-Timing</h2>
 
-    <div class="detail">
-      <div class="detail-hd">
-        <h3 id="odtitle"></h3>
-        <div class="seg" id="osideseg">
-          <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
-          <button type="button" data-side="possible" aria-pressed="false">Possible</button>
+    <h3 class="sub-title" id="method">Method Overview</h3>
+    <div class="figure" id="figure">
+      <div class="fig-top">
+        <div class="fig-src" id="fig-src"></div>
+        <div class="fig-plot">
+          <h4>Alignment score of each window</h4>
+          <div class="legend fig-legend" id="fig-legend"></div>
+          <div class="fig-trace" id="fig-trace"></div>
         </div>
       </div>
-      <span class="verdict" id="overdict"></span>
-      <div class="chart-big" id="ochart"></div>
-      <div class="legend">
-        <span id="olgt"><i class="sw" style="background:var(--viol-soft);border:1px solid var(--viol)"></i>annotated violation (impossible video)</span>
-        <span><i class="ln"></i><span id="olsel">impossible video</span></span>
-        <span><i class="ln twin"></i><span id="oltwin">possible twin</span></span>
-        <span><i style="background:var(--viol)"></i>lowest window</span>
-        <span><i style="background:var(--cand)"></i>other lowest windows</span>
+      <div class="concept" id="concept"></div>
+    </div>
+
+    <h3 class="sub-title">Qualitative Results</h3>
+    <p class="section-sub">PhysTrace on the <b>original IntPhys2 videos</b>. Each scene comes as a <b>Possible</b> video and its <b>Impossible</b> twin, which differs only in the violation.</p>
+    <div class="about-row">
+      <button class="outline-btn" type="button" id="about-btn" aria-expanded="false" aria-controls="about">About the IntPhys2 dataset
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="about" id="about" hidden>
+      <p><b>IntPhys2</b> is an intuitive-physics benchmark of synthetic videos built around four principles. Each scene comes as a <b>Possible</b> video and an <b>Impossible</b> twin that differs only in the violation. <b>IntPhys2-Timing</b> annotates when the violation happens; it is the Ground Truth shaded in the charts below. These are the four Impossible videos shown on this page; click one to open it.</p>
+      <div class="teaser" id="teaser"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="circle" type="button" data-istep="-1" aria-label="Previous attribute"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="pills" role="tablist" aria-label="IntPhys2 attribute" id="i-tabs"></div>
+      <button class="circle" type="button" data-istep="1" aria-label="Next attribute"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+
+    <div class="compare">
+      <h4 class="scene-id-title" id="i-scene"></h4>
+      <div class="vrow two">
+        <div class="vcard"><div class="screen"><video id="v-pos" muted loop autoplay playsinline></video><span class="corner" id="i-pos-min"></span></div>
+          <div class="strip" id="i-pos-strip" aria-hidden="true"></div><div class="cap"><span class="dot" style="background:var(--pos)"></span>Possible</div></div>
+        <div class="vcard"><div class="screen"><video id="v-imp" muted loop autoplay playsinline></video><span class="corner" id="i-imp-min"></span></div>
+          <div class="strip" id="i-imp-strip" aria-hidden="true"></div><div class="cap"><span class="dot" style="background:var(--score)"></span>Impossible</div></div>
       </div>
-      <div class="windows" id="owindows"></div>
-      <p class="note" id="onote"></p>
-    </div>
-  </section>
-  <section class="qual" id="qual">
-    <div class="intro">
-      <div class="eyebrow">Generative reconstructions · IntPhys2 Impossible clips</div>
-      <h2>When does the video break physics?</h2>
-      <p class="lede">Each clip is noised to <b>σ = 0.8</b> and reconstructed by a video world model. PhysTrace slides a <b>2 s window with a 1 s hop</b> over the reconstruction: Qwen3-VL-8B-Thinking writes what it predicts the window should show and the state it actually sees, and PE-AV-Large scores how well the window matches. The three lowest windows (the first window is excluded) form the detected interval around the lowest one. It is a <b>hit</b> when that interval overlaps the annotated violation.</p>
-    </div>
+      <p class="scene-desc left" id="i-desc"></p>
 
-    <div class="tabs" role="tablist" id="tabs"></div>
-
-    <div class="scene">
-      <div class="video">
-        <div class="seg" id="srcseg">
-          <button type="button" data-src="recon" aria-pressed="true">Reconstruction</button>
-          <button type="button" data-src="input" aria-pressed="false">Input clip</button>
+      <div class="linked" id="i-linked">
+        <div class="chart-card">
+          <div class="chart-hd">
+            <h4 id="i-title"></h4>
+            <div class="seg" id="i-side">
+              <button type="button" data-side="possible" aria-pressed="false">Possible</button>
+              <button type="button" data-side="impossible" aria-pressed="true">Impossible</button>
+            </div>
+          </div>
+          <div class="chart" id="i-chart"></div>
         </div>
-        <div class="player"><video id="main" muted loop autoplay playsinline></video><span class="tag" id="vtag"></span></div>
-        <div class="timeline" id="timeline" aria-hidden="true"></div>
-        <div class="ticks" id="ticks"></div>
-        <p class="desc" id="desc"></p>
+        <div class="windows linked-cards" id="i-windows" style="--cols:3"></div>
       </div>
-      <div class="side">
-        <div class="grid4" id="grid4" aria-label="Model and noise level"></div>
-        <div class="legend">
-          <span><i class="sw" style="background:var(--viol-soft);border:1px solid var(--viol)"></i>annotated violation</span>
-          <span><i class="sw" style="background:var(--accent)"></i>detected interval</span>
-          <span><i style="background:var(--viol)"></i>lowest window</span>
-          <span><i style="background:var(--cand)"></i>other candidates</span>
-          <span><i style="background:var(--faint)"></i>first window (excluded)</span>
-        </div>
-      </div>
+    </div>
+    <p class="note labeled" id="i-note"></p>
+
+  </div>
+</section>
+
+<section class="block" id="diffusion">
+  <div class="container">
+    <h2 class="section-title">2. Physical Tracing in Reference-Guided Reconstructions</h2>
+    <p class="section-sub">Keeping the shared pre-violation context, each model denoises only the violation interval from the noised midpoint of the Possible / Impossible latents (<b>σ = 0.8</b>), guided toward the closer reference. PhysTrace then evaluates the reconstruction.</p>
+
+    <div class="nav-row">
+      <button class="circle" type="button" data-dstep="-1" aria-label="Previous attribute"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="pills" role="tablist" aria-label="Reconstruction attribute" id="d-tabs"></div>
+      <button class="circle" type="button" data-dstep="1" aria-label="Next attribute"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
 
-    <div class="detail">
-      <div class="detail-hd">
-        <h3 id="dtitle"></h3>
-        <span class="verdict" id="verdict"></span>
+    <div class="compare">
+      <div class="recon-row" id="d-players"></div>
+      <p class="scene-desc" id="d-desc"></p>
+
+      <div class="chart-card">
+        <div class="chart-hd">
+          <h4 id="d-title"></h4>
+          <div class="seg" id="d-model"></div>
+        </div>
+        <div class="chart" id="d-chart"></div>
+        <div class="legend" id="d-legend"></div>
       </div>
-      <div class="chart-big" id="chart"></div>
-      <div class="windows" id="windows"></div>
-      <p class="note" id="note"></p>
+
+      <div class="windows-hd"><h4 id="d-windows-title"></h4></div>
+      <div class="windows" id="d-windows" style="--cols:3"></div>
     </div>
-  </section>
-</div>
+    <p class="note" id="d-note">Each Impossible clip is reconstructed by every model and scored window by window. The cards show the windows behind each verdict, with what the model predicted and what it observed.</p>
+
+    <div class="summary" id="d-summary"></div>
+  </div>
+</section>
+
 
 <script>
 const DATA = /*DATA*/null;
-const MODEL_NAME = Object.fromEntries(DATA.models);
-const state = { scene: 0, model: "wan", sigma: DATA.sigmas[0], src: "recon" };
+const ORIG = /*ORIG*/null;
+
+// Followers are re-seeked only past this drift; tighter values make the followers stutter on every frame.
+const SYNC_TOLERANCE_S = 0.15;
+const CHART_PAD = { left: 46, right: 16, top: 36, bottom: 42 };
+const CHART_HEIGHT = 310, CHART_HEIGHT_NARROW = 220, NARROW_PX = 560, INT_CHART_HEIGHT = 270;
+const MODEL_COLOR = { wan: "var(--wan)", cosmos: "var(--cos)", unet: "var(--unet)" };
+// Model names and filled buttons use a darker step of aqua and tangerine so text keeps 4:1 contrast.
+const MODEL_INK = { wan: "var(--wan)", cosmos: "var(--cos-ink)", unet: "var(--unet-ink)" };
+// TEMPORARY design preview: forces one reconstruction caption to "possible" to show both badge styles.
+// The data has only Impossible inputs; empty this object before publishing.
+const CAPTION_PREVIEW = { cosmos: "possible" };
+const SIDE_ICON = {
+  impossible: `<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  possible: `<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.9 8.3l2.1 2.1 4.1-4.3" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
+const ICON = {
+  hit: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.4 5 8.8l4.6-5.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  miss: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3 3 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  arrow: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
 const $ = id => document.getElementById(id);
-const tagOf = (m, s) => `${m}_s${String(s).replace(".", "")}`;
-const f2 = v => v.toFixed(2);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const inGT = (w, gt) => w.start < gt[1] && w.end > gt[0];
+const esc = text => String(text).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const capitalize = text => text.charAt(0).toUpperCase() + text.slice(1);
+const span1 = (start, end) => `${start.toFixed(1)}–${end.toFixed(1)} s`;
+const span2 = ([start, end]) => `${start.toFixed(2)}–${end.toFixed(2)} s`;
+const sameText = (first, second) => first.trim() === second.trim();
+const wrapIndex = (index, length) => (index + length) % length;
+const statusPill = (hit, label) => `<span class="status ${hit ? "hit" : "miss"}">${ICON[hit ? "hit" : "miss"]}${label ?? (hit ? "hit" : "miss")}</span>`;
 
-function chartSVG(sc, run, big) {
-  const T = sc.duration, W = big ? 760 : 300, H = big ? 250 : 118, L = big ? 44 : 28, R = 12, Tp = big ? 16 : 8, B = big ? 46 : 26;
-  const ws = run.windows, vals = ws.map(w => w.score);
-  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .15 || .02; lo -= pad; hi += pad;
-  const x = t => L + (t / T) * (W - L - R), y = v => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
-  const fs = big ? 11 : 9, mono = 'font-family="IBM Plex Mono, monospace"';
-  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Window scores over time">`;
-  g += `<rect x="${x(sc.gt[0])}" y="${Tp}" width="${x(sc.gt[1]) - x(sc.gt[0])}" height="${H - Tp - B}" fill="var(--viol-soft)"/>`;
-  g += `<line x1="${x(sc.gt[0])}" x2="${x(sc.gt[0])}" y1="${Tp}" y2="${H - B}" stroke="var(--viol)" stroke-width="1" stroke-dasharray="3 3"/>`;
-  g += `<line x1="${x(sc.gt[1])}" x2="${x(sc.gt[1])}" y1="${Tp}" y2="${H - B}" stroke="var(--viol)" stroke-width="1" stroke-dasharray="3 3"/>`;
-  const ticksY = 3;
-  for (let k = 0; k <= ticksY; k++) {
-    const v = lo + (hi - lo) * k / ticksY;
-    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
-    if (big || k % 3 === 0) g += `<text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="${fs}" ${mono} fill="var(--muted)">${v.toFixed(2)}</text>`;
+// ---------- video helpers ----------
+const visibility = new IntersectionObserver(entries => {
+  for (const entry of entries) entry.isIntersecting ? entry.target.play?.().catch(() => {}) : entry.target.pause();
+}, { rootMargin: "160px" });
+
+function setHTMLWithVideos(container, html) {
+  container.querySelectorAll("video").forEach(video => visibility.unobserve(video));
+  container.innerHTML = html;
+  container.querySelectorAll("video").forEach(video => visibility.observe(video));
+}
+
+function setSource(video, src) {
+  if (video.getAttribute("src") === src) return;
+  video.setAttribute("src", src);
+  video.play?.().catch(() => {});
+}
+
+/** Keeps followers at the master's playback fraction; returns that fraction, or null before metadata loads. */
+function syncFollowers(master, followers) {
+  if (!master || !master.duration) return null;
+  const fraction = master.currentTime / master.duration;
+  for (const video of followers) {
+    if (!video || !video.duration) continue;
+    const target = fraction * video.duration;
+    if (Math.abs(video.currentTime - target) > SYNC_TOLERANCE_S) video.currentTime = target;
   }
-  const by = H - B + (big ? 8 : 5), bh = big ? 6 : 4;
-  g += `<rect x="${x(run.band[0])}" y="${by}" width="${Math.max(2, x(run.band[1]) - x(run.band[0]))}" height="${bh}" rx="1.5" fill="var(--accent)"/>`;
-  if (big) g += `<text x="${x(run.band[1]) + 6}" y="${by + bh}" font-size="10.5" ${mono} fill="var(--accent)">detected ${f2(run.band[0])}–${f2(run.band[1])} s</text>`;
-  for (let t = 0; t <= Math.floor(T); t += big ? 1 : 2)
-    g += `<text x="${x(t)}" y="${H - B + (big ? 30 : 20)}" text-anchor="middle" font-size="${fs}" ${mono} fill="var(--muted)">${t}s</text>`;
-  if (big) g += `<text x="${L}" y="${Tp - 4}" font-size="10.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">window score (PE-AV-Large)</text>`;
-  const cx = w => x((w.start + w.end) / 2);
-  g += `<polyline points="${ws.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="${big ? 2 : 1.5}" stroke-linejoin="round"/>`;
-  ws.forEach((w, i) => {
-    let fill = "var(--accent)", r = big ? 3.5 : 2.2;
-    if (i === 0) fill = "var(--faint)";
-    if (run.candidates.includes(i)) { fill = "var(--cand)"; r = big ? 5 : 3.2; }
-    if (i === run.lowest) { fill = "var(--viol)"; r = big ? 6.5 : 4; }
-    g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="${r}" fill="${fill}" stroke="var(--surface)" stroke-width="1.3"/>`;
-    if (big && run.picks.includes(i))
-      g += `<text x="${cx(w)}" y="${y(w.score) - 11}" text-anchor="middle" font-size="10.5" font-weight="600" ${mono} fill="var(--ink)">W${i + 1}</text>`;
+  return fraction;
+}
+
+function seekFraction(master, fraction) {
+  if (master.duration) master.currentTime = Math.max(0, Math.min(.999, fraction)) * master.duration;
+}
+
+function stripHTML(duration, gt, detected) {
+  const pct = t => `${(t / duration) * 100}%`;
+  let html = gt ? `<div class="gtb" style="left:${pct(gt[0])};width:${pct(gt[1] - gt[0])}"></div>` : "";
+  if (detected) html += `<div class="det" style="left:${pct(detected.from)};width:${pct(detected.to - detected.from)};background:${detected.color}"></div>`;
+  return html + `<div class="head" style="left:0"></div>`;
+}
+
+function setStripHead(strip, fraction) {
+  const head = strip.querySelector(".head");
+  if (head) head.style.left = `${fraction * 100}%`;
+}
+
+// ---------- chart ----------
+/** An SVG path joining the window scores with straight segments. */
+function linePath(points) {
+  return `M${points.map(point => point.join(",")).join("L")}`;
+}
+
+const GT_LABEL = "Ground truth violation", GT_LABEL_FONT = '600 11.5px "Noto Sans", system-ui, sans-serif';
+const measureCanvas = document.createElement("canvas").getContext("2d");
+
+/** The rendered width of `text` in `font`, so a label's background fits its text. */
+function textWidth(text, font) {
+  measureCanvas.font = font;
+  return measureCanvas.measureText(text).width;
+}
+
+/** The Ground Truth label centred above the shaded interval, its pill sized to the text with even padding. */
+function gtPillSVG(middle, plotTop) {
+  const width = Math.ceil(textWidth(GT_LABEL, GT_LABEL_FONT)) + 22, height = 22;
+  return `<g class="gt-pill"><rect x="${middle - width / 2}" y="${plotTop - height - 6}" width="${width}" height="${height}" rx="${height / 2}"/>` +
+    `<text x="${middle}" y="${plotTop - 6 - height / 2 + 4}" text-anchor="middle">${GT_LABEL}</text></g>`;
+}
+
+const BADGE_TITLE_FONT = '700 11.5px "Noto Sans", system-ui, sans-serif', DETECTED_TITLE = "Detected violation";
+
+/**
+ * Where detectedBadgeSVG puts its tag. With `avoid` = [x0, x1] (a shaded interval in pixels) it goes right of x1,
+ * else left of x0, so it never sits on the interval; without it, right of the point, or left of it near the edge.
+ */
+function detectedBadgeBox(x, y, width, avoid = null) {
+  const boxWidth = Math.ceil(textWidth(DETECTED_TITLE, BADGE_TITLE_FONT)) + 40, boxHeight = 28, gap = 18, margin = 12, edge = 4;
+  const rightOf = Math.max(x + gap, avoid ? avoid[1] + margin : 0), leftOf = Math.min(x - gap, avoid ? avoid[0] - margin : Infinity) - boxWidth;
+  const flip = rightOf + boxWidth > width - edge && leftOf >= edge;
+  return { boxX: flip ? leftOf : rightOf, boxY: y - boxHeight / 2, boxWidth, boxHeight, flip };
+}
+
+/** Whether the segment from a to b passes through the rectangle, sampled every couple of pixels. */
+function segmentHitsRect([ax, ay], [bx, by], rect) {
+  const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 2));
+  for (let k = 0; k <= steps; k++) {
+    const x = ax + (bx - ax) * k / steps, y = ay + (by - ay) * k / steps;
+    if (x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) return true;
+  }
+  return false;
+}
+
+// Candidate offsets for a label of size (w, h) around a point, gap g away: name -> [dx, dy] of its top-left corner.
+const LABEL_SPOTS = {
+  above: (w, h, g) => [-w / 2, -h - g], below: (w, h, g) => [-w / 2, g + 4],
+  left: (w, h, g) => [-w - g, -h / 2], right: (w, h, g) => [g, -h / 2],
+  upperLeft: (w, h, g) => [-w - g, -h - g / 2], upperRight: (w, h, g) => [g, -h - g / 2],
+  lowerLeft: (w, h, g) => [-w - g, g / 2], lowerRight: (w, h, g) => [g, g / 2],
+};
+const LABEL_ORDER = ["above", "left", "right", "upperLeft", "upperRight", "below", "lowerLeft", "lowerRight"];
+
+/**
+ * A spot for a small label near (x, y), tried in `order`, that stays inside the plot (its bottom may reach into the
+ * axis band) and clear of every line, point and box given. Falls back to the first spot when every one is taken.
+ */
+function clearLabelSpot(x, y, labelWidth, labelHeight, bounds, segments, boxes, order = LABEL_ORDER) {
+  const gap = 10, pad = 5;
+  const spots = order.map(name => { const [dx, dy] = LABEL_SPOTS[name](labelWidth, labelHeight, gap); return [x + dx, y + dy]; });
+  for (const [sx, sy] of spots) {
+    const rect = { x: sx - pad, y: sy - pad, w: labelWidth + 2 * pad, h: labelHeight + 2 * pad };
+    if (sx < bounds.left || sx + labelWidth > bounds.right || sy < bounds.top - 14 || sy + labelHeight > bounds.bottom + 10) continue;
+    if (segments.some(([a, b]) => segmentHitsRect(a, b, rect))) continue;
+    if (boxes.some(box => box.x < rect.x + rect.w && box.x + box.w > rect.x && box.y < rect.y + rect.h && box.y + box.h > rect.y)) continue;
+    return [sx, sy];
+  }
+  return spots[0];
+}
+
+/**
+ * A "Detected violation" tag beside the detected point, joined to it by a leader and sized to its text.
+ * `avoid` keeps it off a shaded interval; see detectedBadgeBox.
+ */
+function detectedBadgeSVG(x, y, width, avoid = null) {
+  const { boxX, boxY, boxWidth, boxHeight, flip } = detectedBadgeBox(x, y, width, avoid), title = DETECTED_TITLE;
+  return `<g class="detected-badge"><line x1="${x}" y1="${y}" x2="${flip ? boxX + boxWidth : boxX}" y2="${y}"/>` +
+    `<circle class="ring" cx="${x}" cy="${y}" r="11"/>` +
+    `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="14"/>` +
+    `<path class="icon" d="M${boxX + 16},${boxY + 8} l5.5,9.5 h-11 Z"/><text class="icon-mark" x="${boxX + 16}" y="${boxY + 16.5}" text-anchor="middle">!</text>` +
+    `<text class="title" x="${boxX + 27}" y="${boxY + 18}">${title}</text></g>`;
+}
+
+/** A dark rounded label beside a point, flipped to its left near the right edge. */
+function calloutSVG(x, y, text, width) {
+  const boxWidth = text.length * 7 + 16, flip = x + 14 + boxWidth > width - 4;
+  const boxX = flip ? x - 14 - boxWidth : x + 14;
+  return `<g class="callout"><rect x="${boxX}" y="${y - 11}" width="${boxWidth}" height="22" rx="11"/>` +
+    `<text x="${boxX + boxWidth / 2}" y="${y + 4}" text-anchor="middle">${text}</text></g>`;
+}
+
+/**
+ * Draws a window-score line chart into host at its current pixel width, so text renders at its nominal size.
+ * spec: { duration, range: [lo, hi], gt, detected: {from, to, color} | null, primary: series index used for hover,
+ *         series: [{ color, points: [{t, v}], strong, area, marker(i) -> {r, hollow} | null, label(i) -> text | null }],
+ *         tooltip(i) -> html, onPick(i), detectedPoint: {series, index, ringOnly?} | undefined, marks }
+ * Faint (non-strong) series sit behind the strong ones as translucent solid lines without markers.
+ */
+const FAINT_OPACITY = .28;
+
+function drawChart(host, spec) {
+  host.redraw = () => drawChart(host, spec);
+  const width = Math.max(280, Math.round(host.clientWidth || 640));
+  const height = width < NARROW_PX ? CHART_HEIGHT_NARROW : spec.height ?? CHART_HEIGHT;
+  host.drawnWidth = width;
+  const { left, right, top, bottom } = CHART_PAD;
+  const [lo, hi] = spec.range;
+  const xOf = t => left + (t / spec.duration) * (width - left - right);
+  const yOf = value => top + (1 - (value - lo) / (hi - lo)) * (height - top - bottom);
+  const plotBottom = height - bottom;
+
+  let svg = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="Window scores over time"><defs>` +
+    spec.series.map((series, index) => `<linearGradient id="${host.id}-fill-${index}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="${series.color}" stop-opacity=".22"/><stop offset="1" stop-color="${series.color}" stop-opacity="0"/></linearGradient>`).join("") + `</defs>`;
+  if (spec.gt) {
+    const [gtStart, gtEnd] = spec.gt, middle = (xOf(gtStart) + xOf(gtEnd)) / 2;
+    svg += `<rect x="${xOf(gtStart)}" y="${top}" width="${xOf(gtEnd) - xOf(gtStart)}" height="${plotBottom - top}" fill="var(--gt-soft)"/>`;
+    for (const t of spec.gt) svg += `<line x1="${xOf(t)}" x2="${xOf(t)}" y1="${top}" y2="${plotBottom}" stroke="var(--gt)" stroke-opacity=".5" stroke-dasharray="3 4"/>`;
+    svg += gtPillSVG(middle, top);
+  }
+  const yTicks = 3;
+  for (let k = 0; k <= yTicks; k++) {
+    const value = lo + (hi - lo) * k / yTicks;
+    svg += `<line class="grid" x1="${left}" x2="${width - right}" y1="${yOf(value)}" y2="${yOf(value)}"/>`;
+    svg += `<text class="axis" x="${left - 10}" y="${yOf(value) + 3.5}" text-anchor="end">${value.toFixed(2)}</text>`;
+  }
+  const xStep = width < NARROW_PX ? 2 : 1;
+  for (let t = 0; t <= Math.floor(spec.duration); t += xStep)
+    svg += `<text class="axis" x="${xOf(t)}" y="${plotBottom + 30}" text-anchor="middle">${t}s</text>`;
+  if (spec.detected) {
+    const { from, to, color } = spec.detected;
+    svg += `<rect x="${xOf(from)}" y="${plotBottom + 8}" width="${Math.max(3, xOf(to) - xOf(from))}" height="6" rx="3" fill="${color}"/>`;
+  }
+  const ordered = spec.series.map((series, index) => ({ series, index })).sort((first, second) => first.series.strong - second.series.strong);
+  for (const { series, index } of ordered) {
+    const points = series.points.map(point => [xOf(point.t), yOf(point.v)]), path = linePath(points);
+    if (series.area)
+      svg += `<path d="${path} L${points.at(-1)[0]},${plotBottom} L${points[0][0]},${plotBottom} Z" fill="url(#${host.id}-fill-${index})"/>`;
+    svg += `<path d="${path}" fill="none" stroke="${series.color}" stroke-width="${series.strong ? 3 : 2.5}" stroke-linejoin="round" stroke-linecap="round"` +
+      `${series.strong ? "" : ` opacity="${FAINT_OPACITY}"`}/>`;
+  }
+  for (const { series } of ordered) {
+    series.points.forEach((point, i) => {
+      const marker = series.marker?.(i);
+      if (!marker) return;
+      svg += marker.hollow
+        ? `<circle cx="${xOf(point.t)}" cy="${yOf(point.v)}" r="${marker.r}" fill="#fff" stroke="var(--muted)" stroke-width="2"/>`
+        : `<circle cx="${xOf(point.t)}" cy="${yOf(point.v)}" r="${marker.r}" fill="${series.dotColor ?? series.color}"/>`;
+    });
+  }
+  for (const { series } of ordered) {
+    series.points.forEach((point, i) => {
+      const label = series.label?.(i);
+      if (label) svg += calloutSVG(xOf(point.t), yOf(point.v), label, width);
+    });
+  }
+  // Everything a window label must not cover: every line, every point, and the detected tag.
+  const segments = [], obstacles = [];
+  for (const series of spec.series) {
+    const pixels = series.points.map(point => [xOf(point.t), yOf(point.v)]);
+    pixels.forEach((pixel, i) => {
+      if (i) segments.push([pixels[i - 1], pixel]);
+      obstacles.push({ x: pixel[0] - 7, y: pixel[1] - 7, w: 14, h: 14 });
+    });
+  }
+  // The detected window: the same "Detected violation" tag as the method figure.
+  let detectedFlip = false;
+  if (spec.detectedPoint) {
+    const point = spec.series[spec.detectedPoint.series].points[spec.detectedPoint.index], x = xOf(point.t), y = yOf(point.v);
+    obstacles.push({ x: x - 13, y: y - 13, w: 26, h: 26 });
+    if (spec.detectedPoint.ringOnly) {
+      svg += `<g class="detected-badge"><circle class="ring" cx="${x}" cy="${y}" r="11"/></g>`;
+    } else {
+      // Outside the Ground truth interval, as in the method figure.
+      const avoid = spec.gt ? [xOf(spec.gt[0]), xOf(spec.gt[1])] : null, box = detectedBadgeBox(x, y, width, avoid);
+      detectedFlip = box.flip;
+      obstacles.push({ x: box.boxX, y: box.boxY, w: box.boxWidth, h: box.boxHeight });
+      svg += detectedBadgeSVG(x, y, width, avoid);
+    }
+  }
+  // Marked windows: a label beside the point where it covers nothing, and the window's span, shown while its card is hovered.
+  const bounds = { left, right: width - right, top, bottom: plotBottom };
+  for (const [k, mark] of (spec.marks ?? []).entries()) {
+    const series = spec.series[mark.series], point = series.points[mark.index], x = xOf(point.t), y = yOf(point.v);
+    const pillWidth = mark.label.length * 7 + 14, pillHeight = 18;
+    const ownPoint = obstacle => Math.abs(obstacle.x + obstacle.w / 2 - x) < 1 && Math.abs(obstacle.y + obstacle.h / 2 - y) < 1;
+    // The detected point gets its label low, on the side away from its tag, clear of the two lines of the dip.
+    const isDetected = spec.detectedPoint && mark.series === spec.detectedPoint.series && mark.index === spec.detectedPoint.index;
+    const order = isDetected ? (detectedFlip ? ["lowerRight", "right", "below", "above"] : ["lowerLeft", "left", "below", "above"]) : LABEL_ORDER;
+    const [pillX, pillY] = clearLabelSpot(x, y, pillWidth, pillHeight, bounds, segments, obstacles.filter(obstacle => !ownPoint(obstacle)), order);
+    obstacles.push({ x: pillX, y: pillY, w: pillWidth, h: pillHeight });
+    svg += `<g class="mark" data-mark="${k}"><rect class="span" x="${xOf(mark.start)}" y="${top}" width="${xOf(mark.end) - xOf(mark.start)}" height="${plotBottom - top}"/>` +
+      `<g class="mark-pill"><rect x="${pillX}" y="${pillY}" width="${pillWidth}" height="${pillHeight}" rx="9" stroke="${series.dotColor ?? series.color}"/>` +
+      `<text x="${pillX + pillWidth / 2}" y="${pillY + 13}" text-anchor="middle">${mark.label}</text></g></g>`;
+  }
+  svg += `<line class="playhead" x1="${left}" x2="${left}" y1="${top}" y2="${plotBottom}"/>`;
+  svg += `<line class="guide" x1="0" x2="0" y1="${top}" y2="${plotBottom}" visibility="hidden"/>`;
+  svg += `<circle class="hover-dot" r="6" cx="0" cy="0" fill="${spec.series[spec.primary].color}" visibility="hidden"/>`;
+  svg += `<rect x="${left}" y="0" width="${width - left - right}" height="${height}" fill="transparent" style="cursor:pointer"/></svg>`;
+  host.innerHTML = svg + `<div class="tip" role="tooltip"></div>`;
+  host.xOf = xOf;
+  // Where a series point sits in the viewport, for drawing links to it from outside the chart.
+  host.pointAt = (seriesIndex, i) => {
+    const box = host.querySelector("svg").getBoundingClientRect(), point = spec.series[seriesIndex].points[i];
+    return { x: box.left + xOf(point.t) * box.width / width, y: box.top + yOf(point.v) * box.height / height };
+  };
+  bindChartHover(host, spec, xOf, yOf, width);
+}
+
+function bindChartHover(host, spec, xOf, yOf, width) {
+  const svg = host.querySelector("svg"), tip = host.querySelector(".tip"), guide = host.querySelector(".guide"), dot = host.querySelector(".hover-dot");
+  const points = spec.series[spec.primary].points;
+  const nearest = event => {
+    const box = svg.getBoundingClientRect(), x = (event.clientX - box.left) * (width / box.width);
+    let best = 0;
+    points.forEach((point, i) => { if (Math.abs(xOf(point.t) - x) < Math.abs(xOf(points[best].t) - x)) best = i; });
+    return best;
+  };
+  svg.addEventListener("pointermove", event => {
+    const index = nearest(event), x = xOf(points[index].t);
+    guide.setAttribute("x1", x); guide.setAttribute("x2", x); guide.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", x); dot.setAttribute("cy", yOf(points[index].v)); dot.setAttribute("visibility", "visible");
+    tip.innerHTML = spec.tooltip(index);
+    const flip = x > width * .62;
+    tip.style.left = flip ? "" : `${x + 12}px`;
+    tip.style.right = flip ? `${width - x + 12}px` : "";
+    tip.style.top = `${CHART_PAD.top}px`;
+    tip.classList.add("on");
   });
-  if (big) g += `<line id="playhead" x1="${L}" x2="${L}" y1="${Tp}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" opacity=".5"/>`;
-  return g + "</svg>";
+  svg.addEventListener("pointerleave", () => {
+    tip.classList.remove("on");
+    for (const mark of [guide, dot]) mark.setAttribute("visibility", "hidden");
+  });
+  svg.addEventListener("click", event => spec.onPick(nearest(event)));
 }
 
-function render() {
-  const sc = DATA.scenes[state.scene], tag = tagOf(state.model, state.sigma), run = sc.runs[tag];
-  $("tabs").innerHTML = DATA.scenes.map((s, i) => {
-    const marks = DATA.models.flatMap(([m]) => DATA.sigmas.map(sg => `<i class="${s.runs[tagOf(m, sg)].hit ? "h" : ""}" title="${MODEL_NAME[m]} σ=${sg}"></i>`)).join("");
-    const nh = Object.values(s.runs).filter(r => r.hit).length;
-    return `<button class="tab" role="tab" aria-selected="${i === state.scene}" data-i="${i}">
-      <span class="attr">${s.attribute}</span><span class="ttl">${esc(s.title)}</span><span class="hm">${marks}&nbsp;${nh}/${Object.keys(s.runs).length} hit</span></button>`;
-  }).join("");
-
-  $("grid4").innerHTML = DATA.models.flatMap(([m, name]) => DATA.sigmas.map(sg => {
-    const r = sc.runs[tagOf(m, sg)], on = m === state.model && sg === state.sigma;
-    return `<button class="cell" type="button" aria-pressed="${on}" data-m="${m}" data-s="${sg}">
-      <div class="hd">${name.split("-")[0]} <span>σ ${sg}</span><em class="pill ${r.hit ? "hit" : "miss"}">${r.hit ? "hit" : "miss"}</em></div>
-      ${chartSVG(sc, r, false)}</button>`;
-  })).join("");
-
-  const name = MODEL_NAME[state.model];
-  for (const b of $("srcseg").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.src === state.src);
-  const main = $("main"), src = state.src === "input" ? sc.input : run.video;
-  if (main.getAttribute("src") !== src) { main.setAttribute("src", src); main.play?.().catch(() => {}); }
-  $("vtag").textContent = state.src === "input" ? "Input · 60 fps" : `${name} · σ = ${state.sigma}`;
-  $("desc").innerHTML = `${esc(sc.desc)} <b>Violation ${f2(sc.gt[0])}–${f2(sc.gt[1])} s.</b> <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
-  const T = sc.duration;
-  $("timeline").innerHTML = `<div class="band" style="left:${sc.gt[0] / T * 100}%;width:${(sc.gt[1] - sc.gt[0]) / T * 100}%"></div>` +
-    run.picks.map(i => { const w = run.windows[i]; return `<div class="win" style="left:${w.start / T * 100}%;width:${(w.end - w.start) / T * 100}%"><b>W${i + 1}</b></div>`; }).join("") +
-    `<div class="head" id="tlhead" style="left:0"></div>`;
-  $("ticks").innerHTML = Array.from({ length: Math.floor(T) + 1 }, (_, t) => `<span>${t}</span>`).join("");
-
-  $("dtitle").innerHTML = `${name}, σ = ${state.sigma} <em class="pill ${run.hit ? "hit" : "miss"}">${run.hit ? "violation hit" : "missed"}</em>`;
-  const lw = run.windows[run.lowest];
-  $("verdict").textContent = `lowest window W${run.lowest + 1} (${f2(lw.start)}–${f2(lw.end)} s, ${lw.score.toFixed(3)}) · detected ${f2(run.band[0])}–${f2(run.band[1])} s vs. annotated ${f2(sc.gt[0])}–${f2(sc.gt[1])} s`;
-  $("chart").innerHTML = chartSVG(sc, run, true);
-  $("windows").innerHTML = run.picks.map(i => {
-    const w = run.windows[i], isLo = i === run.lowest, isIn = inGT(w, sc.gt), same = w.prediction.trim() === w.state.trim();
-    const role = isLo ? `<span class="role lo">lowest</span>` : isIn ? `<span class="role gt">in violation</span>` : "";
-    return `<article class="wcard ${isIn ? "in" : ""} ${isLo ? "lo" : ""}">
-      <div class="clip"><video src="${run.clips[i]}" muted loop autoplay playsinline preload="auto" aria-label="Window ${i + 1} clip"></video>
-        <span class="badge">W${i + 1} · ${f2(w.start)}–${f2(w.end)} s</span>${role}</div>
-      <div class="wmeta"><b>W${i + 1}</b><span class="score">score ${w.score.toFixed(3)}</span></div>
-      <dl><div><dt>Prediction</dt><dd>${esc(w.prediction)}</dd></div>
-          <div><dt>State <em class="${same ? "" : "diff"}">${same ? "same as prediction" : "differs from prediction"}</em></dt><dd>${esc(w.state)}</dd></div></dl>
-    </article>`;
-  }).join("");
-  $("note").textContent = `Scores and sentences come from a single seed-42 run per model (Wan2.1-1.3B trial ${DATA.trials.wan}, Cosmos-Predict2-2B trial ${DATA.trials.cosmos}). ` +
-    `Wan reconstructs 81 frames (7.5 fps) and Cosmos 93 frames (8.8 fps) at 256 px. Window clips loop the exact 2 s span that was scored.`;
+function setPlayhead(host, t) {
+  const line = host.querySelector(".playhead");
+  if (!line || !host.xOf) return;
+  const x = host.xOf(t);
+  line.setAttribute("x1", x); line.setAttribute("x2", x);
 }
 
-function tick() {
-  const main = $("main"), sc = DATA.scenes[state.scene];
-  if (main.duration) {
-    const t = main.currentTime * (sc.duration / main.duration), frac = Math.min(1, t / sc.duration);
-    const h = $("tlhead"); if (h) h.style.left = `calc(${frac * 100}% - 1px)`;
-    const p = document.getElementById("playhead");
-    if (p) { const W = 760, L = 44, R = 12, X = L + frac * (W - L - R); p.setAttribute("x1", X); p.setAttribute("x2", X); }
+const chartResize = new ResizeObserver(entries => {
+  for (const entry of entries) {
+    const host = entry.target;
+    if (host.redraw && Math.round(host.clientWidth) !== host.drawnWidth) host.redraw();
   }
-  tickOrig();
+});
+
+function tipRow(color, label, value) {
+  return `<div class="tr"><span class="dot" style="background:${color}"></span>${label}<b>${value.toFixed(3)}</b></div>`;
+}
+
+/**
+ * An IntPhys2 window card: the window's name and span on the clip (plus DETECTED on the Impossible video's lowest
+ * window), its score, and the two states. `emphasize` applies `terms`, which holds one term list per state.
+ */
+function intCardHTML({ clip, index, span, score, win, mark, detected, emphasize, terms }) {
+  return `<article class="wcard${detected ? " detected" : ""}" data-mark="${mark}">
+    <div class="card-tags"><b title="${span}">W${index + 1}</b>${detected ? `<span class="det">DETECTED</span>` : ""}</div>
+    <div class="clip"><video src="${clip}" muted loop autoplay playsinline preload="auto" aria-label="Window ${index + 1} clip"></video></div>
+    <div class="wbody"><div class="says">
+      <div class="say"><span class="k exp-title">Expected state</span><p>${emphasize ? highlightTerms(win.prediction, terms.expected) : esc(win.prediction)}</p></div>
+      <div class="say"><span class="k obs-title">Observed state</span><p>${emphasize ? highlightTerms(win.state, terms.observed) : esc(win.state)}</p></div></div>
+      <div class="wscore side"><span>alignment score</span><b>${score.toFixed(3)}</b></div></div></article>`;
+}
+
+
+// ---------- method figure and dataset panel (original IntPhys2 videos) ----------
+const intState = { scene: 0, side: "impossible" };
+// A window's score is plotted at its end: that is when PhysTrace has seen the whole window.
+const windowEnd = (win, scene) => Math.min(win.end, scene.duration);
+const endsInGT = (win, scene) => !!scene.gt && windowEnd(win, scene) >= scene.gt[0] && windowEnd(win, scene) <= scene.gt[1];
+
+function origScoreRange(scene) {
+  const values = [...scene.sides.possible.windows, ...scene.sides.impossible.windows].map(win => win.score);
+  const lo = Math.min(...values), hi = Math.max(...values), pad = (hi - lo) * .14 || .02;
+  // Scores are non-negative; padding below zero only adds a meaningless negative tick.
+  return [Math.max(0, lo - pad), hi + pad];
+}
+
+// One-line statement of each IntPhys2 principle, for the dataset panel.
+const PRINCIPLE = {
+  continuity: "Objects move along continuous paths; they never jump from place to place.",
+  immutability: "Objects keep their color and shape.",
+  permanence: "Objects keep existing when they are out of sight.",
+  solidity: "Solid objects cannot pass through each other.",
+};
+
+function renderDataset() {
+  // Sources are attached on the first open, so a closed panel downloads nothing.
+  setHTMLWithVideos($("teaser"), ORIG.scenes.map((scene, i) => `<button class="tshot" type="button" data-teaser="${i}" aria-label="Open ${esc(scene.attribute)} below">
+      <div class="media"><video data-src="${scene.sides.impossible.video}" muted loop autoplay playsinline preload="none"></video><span>Impossible</span></div>
+      <div class="lab"><b>${esc(scene.attribute)}</b><span class="rule">${esc(PRINCIPLE[scene.attribute] ?? "")}</span><span class="scn">${esc(scene.title)}</span></div></button>`).join(""));
+}
+
+function toggleDataset() {
+  const button = $("about-btn"), panel = $("about"), open = button.getAttribute("aria-expanded") !== "true";
+  button.setAttribute("aria-expanded", open);
+  panel.hidden = !open;
+  if (open) panel.querySelectorAll("video[data-src]").forEach(video => setSource(video, video.dataset.src));
+}
+
+// ---------- method figure: the source video and its trace, then one window explained ----------
+const FIG = { left: 40, right: 16, plotTop: 30, plotHeight: 170, axisGap: 22 };
+const FIG_ATTRIBUTE = "immutability";
+const FIG_FOCUS = 6;  // zero-based: W7, the lowest window, where the expected state stops matching the video
+const FIG_MEMORY_ITEMS = 2;
+// The ball the history expects, which the frames contradict, in red; the ball the frames show in its own yellow,
+// a gold dark enough to read on white.
+const FIG_EXPECTED_HIGHLIGHT = [["green ball", "#d32f2f"]];
+const FIG_OBSERVED_HIGHLIGHT = [["yellow ball", "#d19e00"]];
+// The violation of the example video in two words each side, with the ball colors read from its frames.
+const FIG_CHANGE = [["green ball", "#3cc43f"], ["yellow ball", "#f2b705"]];
+// The yellow ball is out from behind the pole by the middle of W7, so the figure shows the frame at 7.5 s
+// (cut with ffmpeg), with a ring where the ball is, measured on the 256 px frame.
+const FIG_FRAME = "media/figure/immutability_w07_ball.png";
+const FIG_MARK = { x: 235 / 256, y: 185 / 256, label: "yellow ball" };
+
+/** The whole trace of the Impossible video, with the explained window's span shaded and its point enlarged. */
+function drawFigureTrace(host, scene, focus) {
+  host.redraw = () => drawFigureTrace(host, scene, focus);
+  const width = Math.max(300, Math.round(host.clientWidth || 900));
+  host.drawnWidth = width;
+  const wins = scene.sides.impossible.windows;
+  const values = wins.map(win => win.score), pad = (Math.max(...values) - Math.min(...values)) * .14 || .02;
+  const lo = Math.max(0, Math.min(...values) - pad), hi = Math.max(...values) + pad;
+  const plotBottom = FIG.plotTop + FIG.plotHeight, height = plotBottom + FIG.axisGap + 6;
+  const xOf = t => FIG.left + (t / scene.duration) * (width - FIG.left - FIG.right);
+  const yOf = value => FIG.plotTop + (1 - (value - lo) / (hi - lo)) * FIG.plotHeight;
+  const points = wins.map(win => [xOf(windowEnd(win, scene)), yOf(win.score)]);
+  const focusWin = wins[focus];
+
+  let svg = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="Window scores of an Impossible ${esc(scene.attribute)} video">`;
+  if (scene.gt) {
+    const [gtStart, gtEnd] = scene.gt, middle = (xOf(gtStart) + xOf(gtEnd)) / 2;
+    svg += `<rect x="${xOf(gtStart)}" y="${FIG.plotTop}" width="${xOf(gtEnd) - xOf(gtStart)}" height="${FIG.plotHeight}" fill="var(--gt-soft)"/>`;
+    for (const t of scene.gt) svg += `<line x1="${xOf(t)}" x2="${xOf(t)}" y1="${FIG.plotTop}" y2="${plotBottom}" stroke="var(--gt)" stroke-opacity=".5" stroke-dasharray="3 4"/>`;
+    svg += gtPillSVG(middle, FIG.plotTop);
+  }
+  svg += `<rect class="t-span" x="${xOf(focusWin.start)}" y="${FIG.plotTop}" width="${xOf(windowEnd(focusWin, scene)) - xOf(focusWin.start)}" height="${FIG.plotHeight}"/>`;
+  for (let k = 0; k <= 3; k++) {
+    const value = lo + (hi - lo) * k / 3;
+    svg += `<line x1="${FIG.left}" x2="${width - FIG.right}" y1="${yOf(value)}" y2="${yOf(value)}" stroke="#ededed" stroke-dasharray="2 4"/>`;
+    svg += `<text class="t-axis" x="${FIG.left - 8}" y="${yOf(value) + 3.5}" text-anchor="end">${value.toFixed(2)}</text>`;
+  }
+  svg += `<path d="${linePath(points)}" fill="none" stroke="var(--score)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  points.forEach(([cx, cy], i) => { svg += `<circle cx="${cx}" cy="${cy}" r="${i === focus ? 7 : 3.5}" fill="var(--score)"/>`; });
+  // Outside the Ground truth interval, so the tag never sits on the shading it is compared with.
+  svg += detectedBadgeSVG(...points[focus], width, scene.gt ? [xOf(scene.gt[0]), xOf(scene.gt[1])] : null);
+  const xStep = width < NARROW_PX ? 2 : 1;
+  for (let t = 0; t <= Math.floor(scene.duration); t += xStep)
+    svg += `<text class="t-axis" x="${xOf(t)}" y="${plotBottom + FIG.axisGap}" text-anchor="middle">${t}s</text>`;
+  svg += `<line class="playhead" x1="${FIG.left}" x2="${FIG.left}" y1="${FIG.plotTop}" y2="${plotBottom}"/>`;
+  host.innerHTML = svg + "</svg>";
+  host.xOf = xOf;
+  host.sceneDuration = scene.duration;
+}
+
+/**
+ * Escaped text with every whole-word, case-insensitive occurrence of each term wrapped in bold of that term's color.
+ * terms: [[words, cssColor], ...]; one combined pattern, so a later term never matches inside earlier markup.
+ */
+function highlightTerms(text, terms) {
+  const escaped = esc(text);
+  if (!terms?.length) return escaped;
+  const colorOf = new Map(terms.map(([words, color]) => [words.toLowerCase(), color]));
+  const alternatives = terms.map(([words]) => esc(words).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp(`\\b(?:${alternatives.join("|")})\\b`, "gi");
+  return escaped.replace(pattern, match => `<b class="hl" style="color:${colorOf.get(match.toLowerCase())}">${match}</b>`);
+}
+
+/** The latest trusted windows before `focus`, newest last, skipping repeats of the same sentence. */
+function memoryBefore(windows, focus, count) {
+  const picked = [];
+  for (let i = focus - 1; i >= 0 && picked.length < count; i--)
+    if (windows[i].trusted && !picked.some(entry => sameText(entry.win.state, windows[i].state))) picked.unshift({ win: windows[i], i });
+  return picked;
+}
+
+/**
+ * Draws the concept's connectors from the laid-out boxes: the input group into the MLLM, the MLLM into both states,
+ * the alignment score between the window video and the expected state, and the observed state back into the memory.
+ */
+function drawConceptLoop() {
+  const concept = $("concept"), svg = concept.querySelector(".c-loop");
+  if (!svg || getComputedStyle(svg).display === "none") return;
+  const box = concept.getBoundingClientRect(), local = element => {
+    const rect = concept.querySelector(element).getBoundingClientRect();
+    return { left: rect.left - box.left, right: rect.right - box.left, top: rect.top - box.top, bottom: rect.bottom - box.top,
+      x: rect.left - box.left + rect.width / 2, y: rect.top - box.top + rect.height / 2 };
+  };
+  const inputs = local(".c-in"), video = local(".c-win"), memory = local(".c-mem"), mllm = local(".c-mllm"), expected = local(".c-exp"), observed = local(".c-obs");
+  const head = (x, y, direction, color) => {
+    const [dx, dy] = { right: [1, 0], down: [0, 1], up: [0, -1] }[direction];
+    return `<path d="M${x - 9 * dx - 6 * dy},${y - 9 * dy - 6 * dx} L${x},${y} L${x - 9 * dx + 6 * dy},${y - 9 * dy + 6 * dx} Z" fill="${color}"/>`;
+  };
+  // The MLLM spans both rows, so the input group and each output meet it with a straight horizontal arrow.
+  const ink = "#9a9a9a", arrow = (x1, x2, y) => `<line x1="${x1 + 6}" x2="${x2 - 10}" y1="${y}" y2="${y}" stroke="${ink}" stroke-width="2"/>${head(x2 - 2, y, "right", ink)}`;
+  // Both loops run outside every box: the alignment score over the top, the memory update under the bottom.
+  const overY = Math.min(inputs.top, mllm.top, expected.top) - 16, label = concept.dataset.alignment;
+  const labelWidth = label.length * 7.2 + 20, labelX = (video.x + expected.x) / 2;
+  const loopY = Math.max(inputs.bottom, mllm.bottom, observed.bottom) + 16;
+  svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+  svg.innerHTML =
+    arrow(inputs.right, mllm.left, inputs.y) +
+    arrow(mllm.right, expected.left, expected.y) + arrow(mllm.right, observed.left, observed.y) +
+    // alignment score between the window video and the expected state
+    // A solid bracket with soft rounded corners, a faint halo under it, and a dot where it meets each box.
+    (() => {
+      const bracket = `M${video.x},${video.top - 3} V${overY + 14} Q${video.x},${overY} ${video.x + 14},${overY} H${expected.x - 14} Q${expected.x},${overY} ${expected.x},${overY + 14} V${expected.top - 3}`;
+      return `<path d="${bracket}" stroke="var(--align)" stroke-opacity=".18" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+        `<path class="sim-path" d="${bracket}" stroke="var(--align)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+        `<circle cx="${video.x}" cy="${video.top - 3}" r="4" fill="var(--align)"/><circle cx="${expected.x}" cy="${expected.top - 3}" r="4" fill="var(--align)"/>`;
+    })() +
+    `<g class="sim-pill"><rect x="${labelX - labelWidth / 2}" y="${overY - 11}" width="${labelWidth}" height="22" rx="11"/>` +
+    `<text x="${labelX}" y="${overY + 4}" text-anchor="middle">${label}</text></g>` +
+    // observed state -> memory, only if trusted
+    `<path d="M${observed.x},${observed.bottom} V${loopY - 10} Q${observed.x},${loopY} ${observed.x - 10},${loopY} H${memory.x + 10} Q${memory.x},${loopY} ${memory.x},${loopY - 10} V${memory.bottom + 10}"
+      stroke="var(--history)" stroke-width="2" stroke-dasharray="5 5" fill="none"/>` +
+    head(memory.x, memory.bottom + 2, "up", "var(--history)") +
+    `<text class="trusted" x="${(memory.x + observed.x) / 2}" y="${loopY + 17}" text-anchor="middle">added to the selected history only if trusted</text>`;
+}
+
+function renderFigure() {
+  const scene = ORIG.scenes.find(item => item.attribute === FIG_ATTRIBUTE) ?? ORIG.scenes[0];
+  const imp = scene.sides.impossible, wins = imp.windows, win = wins[FIG_FOCUS];
+  setHTMLWithVideos($("fig-src"), `<div class="thumb"><video id="fig-video" src="${imp.video}" muted loop autoplay playsinline preload="auto"
+      aria-label="Impossible ${esc(scene.attribute)} video"></video><span class="chip">Impossible Video</span></div>
+    <div class="what"><b class="change">${FIG_CHANGE.map(([words, color]) => `<span><i style="background:${color}"></i>${esc(words)}</span>`).join('<em aria-label="becomes">→</em>')}</b><span>(attribute: ${esc(scene.attribute)})</span></div>`);
+  drawFigureTrace($("fig-trace"), scene, FIG_FOCUS);
+  $("fig-legend").innerHTML = `<span><i class="sw" style="background:var(--score)"></i>alignment score</span><span><i class="sw band"></i>Ground truth violation</span>
+    <span><i class="sw" style="background:#6e6e6e;opacity:.3;height:10px"></i>Current window</span>`;
+  const memory = memoryBefore(wins, FIG_FOCUS, FIG_MEMORY_ITEMS);
+  const alignment = `alignment score: ${win.score.toFixed(3)}`;
+  $("concept").dataset.alignment = alignment;
+  setHTMLWithVideos($("concept"), `<div class="c-grid">
+      <div class="c-in">
+        <div class="c-box c-win"><h4>Current window <span class="when">${span1(win.start, windowEnd(win, scene))}</span></h4><div class="thumb"><img src="${FIG_FRAME}" width="256" height="256" alt="A frame of window ${FIG_FOCUS + 1}, where the yellow ball appears"><span class="mark on" style="left:${FIG_MARK.x * 100}%;top:${FIG_MARK.y * 100}%"><i></i><b>${esc(FIG_MARK.label)}</b></span></div></div>
+        <span class="c-plus" aria-hidden="true">+</span>
+        <div class="c-box c-mem"><h4>Selected history</h4><ul>${memory.map(({ win: item, i }) => `<li><b>W${i + 1}</b>${esc(item.state)}</li>`).join("")}</ul></div>
+      </div>
+      <div class="c-box c-mllm"><svg class="robot" viewBox="0 0 72 72" aria-hidden="true"><line x1="36" y1="9" x2="36" y2="17" stroke="#3b5bdb" stroke-width="3" stroke-linecap="round"/><circle cx="36" cy="8" r="4.5" fill="#ff8a65" stroke="#3b5bdb" stroke-width="2"/><rect x="7" y="30" width="7" height="14" rx="3.5" fill="#9fb4f5" stroke="#3b5bdb" stroke-width="2"/><rect x="58" y="30" width="7" height="14" rx="3.5" fill="#9fb4f5" stroke="#3b5bdb" stroke-width="2"/><rect x="12" y="17" width="48" height="40" rx="14" fill="#e8eeff" stroke="#3b5bdb" stroke-width="3"/><rect x="18" y="24" width="36" height="22" rx="10" fill="#2f3a66"/><circle cx="28" cy="34" r="4.5" fill="#7ee0ff"/><circle cx="44" cy="34" r="4.5" fill="#7ee0ff"/><circle cx="29.5" cy="32.5" r="1.4" fill="#fff"/><circle cx="45.5" cy="32.5" r="1.4" fill="#fff"/><path d="M31 40.5q5 3.5 10 0" fill="none" stroke="#7ee0ff" stroke-width="2.2" stroke-linecap="round"/><circle cx="20" cy="51" r="2.6" fill="#ffb3c1"/><circle cx="52" cy="51" r="2.6" fill="#ffb3c1"/><rect x="24" y="57" width="24" height="9" rx="4" fill="#9fb4f5" stroke="#3b5bdb" stroke-width="2"/></svg><h4>MLLM</h4></div>
+      <div class="c-box c-state c-exp"><h4>Expected state</h4><p>${highlightTerms(win.prediction, FIG_EXPECTED_HIGHLIGHT)}</p><span class="note">${alignment} with the W${FIG_FOCUS + 1} video</span></div>
+      <div class="c-box c-state c-obs"><h4>Observed state</h4><p>${highlightTerms(win.state, FIG_OBSERVED_HIGHLIGHT)}</p><span class="note">added to the selected history only if trusted</span></div>
+    </div>
+    <svg class="c-loop" aria-hidden="true"></svg>`);
+  requestAnimationFrame(drawConceptLoop);
+}
+
+// ---------- section: IntPhys2 evaluation ----------
+// Words bolded or colored in the Impossible video's states, per attribute. `all` applies to both states of every
+// shown window; on the detected window `detected` replaces it, with its own list for each state. Red marks what the
+// expected state gets wrong, blue what the observed state sees instead. Each is a darker shade of its state's title
+// color (orange -> red, light blue -> saturated blue), so a term reads as belonging to its state; the blue stays
+// saturated so it does not read as the black text.
+const BOLD = "var(--title)", RED = "var(--gt)", BLUE = "var(--obs-term)";
+const INT_HIGHLIGHT = {
+  continuity: {
+    all: [["white ball", BOLD]],
+    detected: { expected: [["white ball", BOLD], ["right", RED]], observed: [["white ball", BOLD], ["left", BLUE]] },
+  },
+  immutability: {
+    all: [["green ball", BOLD], ["yellow ball", BOLD]],
+    detected: { expected: [["green ball", RED]], observed: [["yellow ball", BLUE]] },
+  },
+  permanence: {
+    all: [],
+    detected: { expected: [["green ball", RED]], observed: [["empty", BLUE], ["absent", BLUE]] },
+  },
+  solidity: {
+    all: [],
+    detected: { expected: [["rests on the light wooden block", RED]], observed: [["not visible", BLUE]] },
+  },
+};
+// What happens in each video, written from its frames and observed states; {gt} becomes the Ground truth interval.
+// {gt}: the Ground truth interval, {det}: the detected window, {min} / {impmin}: the two videos' lowest scores.
+// The Impossible text says why its detected window scores lowest: its expected state is not what that window shows.
+const INT_STORY = {
+  continuity: {
+    impossible: "A ball is placed in the right teacup on a theater stage, and during the Ground truth interval {gt} it reappears in the left teacup. In {det}, the expected state still puts the ball in the right teacup, but the window's video shows it in the left one, so its alignment score drops to the lowest.",
+    possible: "A ball is placed in the right teacup on a theater stage and reappears in the same cup. Its lowest alignment score is {min}, above the Impossible video's {impmin}.",
+  },
+  immutability: {
+    impossible: "A green ball rolls along the clothesline rail behind the towel, and during the Ground truth interval {gt} it comes out the other side yellow. In {det}, the expected state still describes a green ball, but the window's video shows a yellow one, so its alignment score drops to the lowest.",
+    possible: "A green ball rolls along the clothesline rail behind the towel and comes out the other side still green. Its lowest alignment score is {min}, above the Impossible video's {impmin}.",
+  },
+  permanence: {
+    impossible: "A dark ring, which the states call a green ball, sits in the balloon basket while the view moves away and back, and during the Ground truth interval {gt} the basket is empty. In {det}, the expected state still has the ball in view, but the window's video shows an empty basket, so its alignment score drops to the lowest.",
+    possible: "A dark ring sits in the balloon basket while the view moves away and back, and it is still there when the basket returns. Its lowest alignment score is {min}, above the Impossible video's {impmin}.",
+  },
+  solidity: {
+    impossible: "A yellow cone drops into the tub and, during the Ground truth interval {gt}, vanishes instead of landing on the wooden board. In {det}, the expected state has the cone resting on the board, but the window's video shows no cone, so its alignment score drops to the lowest.",
+    possible: "A yellow cone drops into the tub and stands on the wooden board, visible above the rim. Its lowest alignment score is {min}, above the Impossible video's {impmin}.",
+  },
+};
+
+function highlightFor(attribute, detected) {
+  const rule = INT_HIGHLIGHT[attribute] ?? {};
+  if (detected && rule.detected) return rule.detected;
+  return { expected: rule.all ?? [], observed: rule.all ?? [] };
+}
+function renderIntphys() {
+  if (!ORIG) { for (const id of ["intphys", "method"]) $(id).hidden = true; return; }
+  const scene = ORIG.scenes[intState.scene], sel = scene.sides[intState.side];
+  $("i-tabs").innerHTML = ORIG.scenes.map((item, i) =>
+    `<button class="pill" role="tab" type="button" aria-selected="${i === intState.scene}" data-iscene="${i}">${esc(item.attribute)}</button>`).join("");
+  setSource($("v-pos"), scene.sides.possible.video);
+  setSource($("v-imp"), scene.sides.impossible.video);
+  $("i-pos-min").textContent = `min ${scene.sides.possible.min_score.toFixed(3)}`;
+  $("i-imp-min").textContent = `min ${scene.sides.impossible.min_score.toFixed(3)}`;
+  $("i-pos-strip").innerHTML = stripHTML(scene.duration, null, null);
+  $("i-imp-strip").innerHTML = stripHTML(scene.duration, scene.gt, null);
+  $("i-scene").textContent = scene.group;
+  $("i-desc").innerHTML = `${esc(scene.desc)}${scene.gt ? ` <b>Violation ${span2(scene.gt)}.</b>` : ""}`;
+
+  const impRun = scene.sides.impossible;
+  // Both sides show the Impossible video's first, lowest and next windows, so the twins line up.
+  const shownWindows = impRun.shown;
+  $("i-title").textContent = capitalize(scene.attribute);
+  // Only the selected video's trace is drawn. The Ground truth interval and the detection belong to the Impossible
+  // video, so they show only with it; the y range stays shared so the two traces read on the same scale.
+  const isImpossible = intState.side === "impossible";
+  drawChart($("i-chart"), {
+    duration: scene.duration, range: origScoreRange(scene), gt: isImpossible ? scene.gt : null, detected: null, primary: 0, height: INT_CHART_HEIGHT,
+    series: [{
+      color: "var(--score)", strong: true,
+      points: sel.windows.map(win => ({ t: windowEnd(win, scene), v: win.score })),
+      marker: i => ({ r: isImpossible && i === impRun.lowest ? 7 : shownWindows.includes(i) ? 5.5 : 3.5 }),
+    }],
+    tooltip: i => {
+      const win = sel.windows[i];
+      return `<div class="th">W${i + 1} · ${span1(win.start, windowEnd(win, scene))}</div>` + tipRow("var(--score)", capitalize(intState.side), win.score) +
+        (isImpossible && endsInGT(win, scene) ? `<div class="flag">ends inside the violation</div>` : "");
+    },
+    onPick: i => seekFraction($("v-pos"), sel.windows[i].start / scene.duration),
+    detectedPoint: isImpossible ? { series: 0, index: impRun.lowest } : null,
+    marks: shownWindows.map(i => ({ series: 0, index: i, start: sel.windows[i].start, end: windowEnd(sel.windows[i], scene), label: `W${i + 1}` })),
+  });
+
+  for (const button of $("i-side").querySelectorAll("button")) button.setAttribute("aria-pressed", button.dataset.side === intState.side);
+  setHTMLWithVideos($("i-windows"), shownWindows.map((i, k) => {
+    const win = sel.windows[i], isImpossible = intState.side === "impossible";
+    return intCardHTML({
+      clip: sel.clips[i], index: i, span: span1(win.start, windowEnd(win, scene)), score: win.score, win, mark: k,
+      detected: isImpossible && i === impRun.lowest, emphasize: isImpossible, terms: highlightFor(scene.attribute, i === impRun.lowest),
+    });
+  }).join(""));
+  const detected = impRun.windows[impRun.lowest];
+  const fill = {
+    gt: scene.gt ? `<b>(${span2(scene.gt)})</b>` : "",
+    det: `<b>W${impRun.lowest + 1} (${span1(detected.start, windowEnd(detected, scene))})</b>`,
+    min: `<b>${sel.min_score.toFixed(3)}</b>`, impmin: `<b>${impRun.min_score.toFixed(3)}</b>`,
+  };
+  const story = esc(INT_STORY[scene.attribute]?.[intState.side] ?? "").replace(/\{(gt|det|min|impmin)\}/g, (_, key) => fill[key]);
+  $("i-note").innerHTML = `<b class="note-label">${capitalize(intState.side)} video</b><span>${story}</span>`;
+}
+
+// ---------- section: diffusion reconstructions ----------
+const MODEL_NAME = Object.fromEntries(DATA.models);
+const diffState = { scene: 0, model: DATA.models[0][0], sigma: DATA.sigmas[0] };
+const runTag = (model, sigma) => `${model}_s${String(sigma).replace(".", "")}`;
+const overlapsGT = (win, gt) => win.start < gt[1] && win.end > gt[0];
+const windowCenter = win => (win.start + win.end) / 2;
+const shortName = model => MODEL_NAME[model].split("-")[0];
+
+function reconScoreRange(scene) {
+  const values = DATA.models.flatMap(([model]) => scene.runs[runTag(model, diffState.sigma)].windows.map(win => win.score));
+  const lo = Math.min(...values), hi = Math.max(...values), pad = (hi - lo) * .14 || .02;
+  return [Math.max(0, lo - pad), hi + pad];
+}
+
+function renderDiffSummary() {
+  const totals = DATA.models.map(([model]) => DATA.scenes.filter(scene => scene.runs[runTag(model, diffState.sigma)].hit).length);
+  $("d-summary").innerHTML = `<h4>Violation hit at σ = ${diffState.sigma}</h4>
+    <table class="matrix"><thead><tr><th>Scene</th>${DATA.models.map(([model]) => `<th><span class="dot" style="background:${MODEL_COLOR[model]}"></span>${esc(MODEL_NAME[model])}</th>`).join("")}</tr></thead>
+    <tbody>${DATA.scenes.map((scene, i) => `<tr data-dscene="${i}" aria-current="${i === diffState.scene}">
+      <td><span class="lab">${esc(scene.attribute)}</span>${esc(scene.title)}</td>
+      ${DATA.models.map(([model]) => `<td>${statusPill(scene.runs[runTag(model, diffState.sigma)].hit)}</td>`).join("")}</tr>`).join("")}</tbody>
+    <tfoot><tr><td>hits</td>${totals.map(total => `<td>${total} / ${DATA.scenes.length}</td>`).join("")}</tr></tfoot></table>`;
+}
+
+function ensureDiffPlayers() {
+  const players = $("d-players");
+  if (players.childElementCount) return;
+  players.style.setProperty("--n", DATA.models.length);
+  players.innerHTML = `<div class="vgroup"><h5 class="group-band">Original Videos</h5><div class="cols">
+      <div class="vcol"><h5 class="vname"><span>Possible</span></h5><div class="vcard"><div class="screen"><video id="v-possible" muted loop autoplay playsinline></video></div>
+        <div class="strip" id="d-strip-possible" aria-hidden="true"></div></div></div>
+      <div class="vcol"><h5 class="vname"><span id="d-side-input"></span></h5><div class="vcard"><div class="screen"><video id="v-input" muted loop autoplay playsinline></video></div>
+        <div class="strip" id="d-strip-input" aria-hidden="true"></div></div></div></div></div>
+    <span class="divider" aria-hidden="true"></span>
+    <div class="vgroup recon"><h5 class="group-band">Reference-Guided Reconstructed Videos</h5><div class="cols">` +
+    DATA.models.map(([key, name]) => `<div class="vcol"><h5 class="vname" title="${esc(name)}" style="color:${MODEL_INK[key]}"><span>${esc(name)}</span></h5><button type="button" class="vcard" data-dmodel="${key}" aria-label="${esc(name)} reconstruction" style="--c:${MODEL_INK[key]}">
+      <div class="screen"><video id="v-${key}" muted loop autoplay playsinline></video></div>
+      <div class="strip" id="d-strip-${key}" aria-hidden="true"></div>
+      <div class="cap"><span class="side-name" data-side-of="${key}"></span></div></button></div>`).join("") + `</div></div>`;
+  players.querySelectorAll("video").forEach(video => visibility.observe(video));
+}
+
+function renderDiffusion() {
+  const scene = DATA.scenes[diffState.scene], model = diffState.model, run = scene.runs[runTag(model, diffState.sigma)];
+  const duration = scene.duration;
+  renderDiffSummary();
+  ensureDiffPlayers();
+  $("d-tabs").innerHTML = DATA.scenes.map((item, i) =>
+    `<button class="pill" role="tab" type="button" aria-selected="${i === diffState.scene}" data-dscene="${i}">${esc(item.attribute)}</button>`).join("");
+  setSource($("v-input"), scene.input);
+  setSource($("v-possible"), scene.possible);
+  $("d-strip-possible").innerHTML = stripHTML(duration, null, null);
+  // The input and its reconstructions come from the same IntPhys2 side; the Possible twin is shown beside it.
+  const sideName = capitalize(scene.side ?? "impossible");
+  $("d-side-input").textContent = sideName;
+  for (const label of $("d-players").querySelectorAll(".side-name")) {
+    const side = CAPTION_PREVIEW[label.dataset.sideOf] ?? scene.side ?? "impossible";
+    label.innerHTML = `${SIDE_ICON[side] ?? ""}${esc(capitalize(side))}`;
+    label.dataset.side = side;
+  }
+  $("d-strip-input").innerHTML = stripHTML(duration, scene.gt, null);
+  for (const [key] of DATA.models) {
+    const modelRun = scene.runs[runTag(key, diffState.sigma)];
+    setSource($(`v-${key}`), modelRun.video);
+    $(`d-strip-${key}`).innerHTML = stripHTML(duration, scene.gt, null);
+    $("d-players").querySelector(`[data-dmodel="${key}"]`).setAttribute("aria-pressed", key === model);
+  }
+  $("d-desc").innerHTML = `<b>${esc(scene.title)}.</b> ${esc(scene.desc)} <b>Violation ${span2(scene.gt)}.</b> <span class="mono">${esc(scene.group)}</span>`;
+
+  $("d-model").innerHTML = DATA.models.map(([key]) => `<button type="button" class="model-btn" data-dmodel="${key}" aria-pressed="${key === model}"
+    style="--c:${MODEL_INK[key]}">${esc(shortName(key))}</button>`).join("");
+  $("d-title").textContent = `${MODEL_NAME[model]}, σ = ${diffState.sigma}`;
+  const otherModels = DATA.models.map(([key]) => key).filter(key => key !== model);
+  $("d-legend").innerHTML = `<span><i class="sw" style="background:${MODEL_COLOR[model]}"></i>${esc(MODEL_NAME[model])}</span>` +
+    otherModels.map(key => `<span><i class="sw faint" style="background:${MODEL_COLOR[key]}"></i>${esc(MODEL_NAME[key])}</span>`).join("");
+
+  const seriesFor = (key, strong) => {
+    const modelRun = scene.runs[runTag(key, diffState.sigma)];
+    return {
+      color: MODEL_COLOR[key], strong,
+      points: modelRun.windows.map(win => ({ t: windowCenter(win), v: win.score })),
+      // Same markers as section 1: the detected (lowest) point largest, the windows shown as cards next.
+      marker: strong ? i => ({ r: i === modelRun.lowest ? 7 : modelRun.shown.includes(i) ? 5.5 : 3.5 }) : null,
+    };
+  };
+  drawChart($("d-chart"), {
+    duration, range: reconScoreRange(scene), gt: scene.gt, primary: 0,
+    detected: null,
+    series: [seriesFor(model, true), ...otherModels.map(key => seriesFor(key, false))],
+    tooltip: i => {
+      const win = run.windows[i];
+      return `<div class="th">W${i + 1} · ${span1(win.start, win.end)}</div>` +
+        [model, ...otherModels].map(key => {
+          const other = scene.runs[runTag(key, diffState.sigma)].windows[i];
+          return other ? tipRow(MODEL_COLOR[key], esc(shortName(key)), other.score) : "";
+        }).join("") +
+        (i === 0 ? `<div class="flag">first window, excluded from detection</div>` : overlapsGT(win, scene.gt) ? `<div class="flag">overlaps the violation</div>` : "");
+    },
+    onPick: i => seekFraction($("v-input"), run.windows[i].start / duration),
+    detectedPoint: { series: 0, index: run.lowest, ringOnly: true },
+    marks: run.shown.map((i, k) => ({ series: 0, index: i, start: run.windows[i].start, end: Math.min(run.windows[i].end, duration), label: `W${i + 1}` })),
+  });
+
+  $("d-windows-title").textContent = `${MODEL_NAME[model]}: windows behind the verdict`;
+  // Same cards as section 1: the first counted window, the lowest (detected) one and the one two after it.
+  setHTMLWithVideos($("d-windows"), run.shown.map((i, k) => {
+    const win = run.windows[i];
+    return intCardHTML({
+      clip: run.clips[i], index: i, span: span1(win.start, win.end), score: win.score, win, mark: k,
+      detected: i === run.lowest, emphasize: false, terms: null,
+    });
+  }).join(""));
+}
+
+// ---------- playback loop and events ----------
+function tick() {
+  if (ORIG) {
+    const figVideo = $("fig-video");
+    const figTrace = $("fig-trace");
+    if (figVideo?.duration && figTrace.sceneDuration) setPlayhead(figTrace, (figVideo.currentTime / figVideo.duration) * figTrace.sceneDuration);
+    const scene = ORIG.scenes[intState.scene], fraction = syncFollowers($("v-pos"), [$("v-imp")]);
+    if (fraction !== null) {
+      setStripHead($("i-pos-strip"), fraction); setStripHead($("i-imp-strip"), fraction);
+      setPlayhead($("i-chart"), fraction * scene.duration);
+    }
+  }
+  const scene = DATA.scenes[diffState.scene];
+  const fraction = syncFollowers($("v-input"), [$("v-possible"), ...DATA.models.map(([key]) => $(`v-${key}`))]);
+  if (fraction !== null) {
+    for (const id of ["input", "possible", ...DATA.models.map(([key]) => key)]) setStripHead($(`d-strip-${id}`), fraction);
+    setPlayhead($("d-chart"), fraction * scene.duration);
+  }
   requestAnimationFrame(tick);
 }
 
-document.addEventListener("click", e => {
-  const tab = e.target.closest("#tabs .tab"), cell = e.target.closest(".cell"), seg = e.target.closest("#srcseg button");
-  if (tab) { state.scene = +tab.dataset.i; render(); }
-  if (cell) { state.model = cell.dataset.m; state.sigma = +cell.dataset.s; state.src = "recon"; render(); }
-  if (seg) { state.src = seg.dataset.src; render(); }
+document.addEventListener("click", event => {
+  const teaser = event.target.closest("[data-teaser]");
+  const intScene = event.target.closest("[data-iscene]"), intStep = event.target.closest("[data-istep]"), side = event.target.closest("#i-side button");
+  const diffScene = event.target.closest("[data-dscene]"), diffStep = event.target.closest("[data-dstep]"), model = event.target.closest("[data-dmodel]");
+  if (event.target.closest("#about-btn")) toggleDataset();
+  if (teaser) { intState.scene = +teaser.dataset.teaser; intState.side = "impossible"; renderIntphys(); $("i-tabs").scrollIntoView({ block: "center" }); }
+  if (intScene) { intState.scene = +intScene.dataset.iscene; renderIntphys(); }
+  if (intStep) { intState.scene = wrapIndex(intState.scene + +intStep.dataset.istep, ORIG.scenes.length); renderIntphys(); }
+  if (side) { intState.side = side.dataset.side; renderIntphys(); }
+  if (diffScene) { diffState.scene = +diffScene.dataset.dscene; renderDiffusion(); }
+  if (diffStep) { diffState.scene = wrapIndex(diffState.scene + +diffStep.dataset.dstep, DATA.scenes.length); renderDiffusion(); }
+  if (model) { diffState.model = model.dataset.dmodel; renderDiffusion(); }
 });
-const start = (location.hash || "").slice(1), si = DATA.scenes.findIndex(s => s.attribute === start);
-if (si >= 0) state.scene = si;
-render();
+
+if (ORIG) { renderDataset(); renderFigure(); }
+renderIntphys();
+renderDiffusion();
+for (const id of ["fig-trace", "i-chart", "d-chart"]) chartResize.observe($(id));
+new ResizeObserver(() => requestAnimationFrame(drawConceptLoop)).observe($("concept"));
+// Labels are sized to their text, so everything drawn before the web fonts arrived is drawn again once they have.
+document.fonts?.ready.then(() => {
+  for (const id of ["fig-trace", "i-chart", "d-chart"]) $(id).redraw?.();
+  requestAnimationFrame(drawConceptLoop);
+});
+// Hovering a window card lights up its window on the chart.
+// Hovering a window card lights up its window on the chart above it, in both sections.
+for (const [cards, chart] of [["i-windows", "i-chart"], ["d-windows", "d-chart"]])
+  for (const [type, on] of [["mouseover", true], ["mouseout", false]])
+    $(cards).addEventListener(type, event => {
+      const card = event.target.closest("[data-mark]");
+      if (card) $(chart).querySelector(`.mark[data-mark="${card.dataset.mark}"]`)?.classList.toggle("on", on);
+    });
+document.querySelectorAll("video").forEach(video => visibility.observe(video));
 requestAnimationFrame(tick);
-// ---- Section 2: original videos ----
-const ORIG = /*ORIG*/null;
-const ostate = { scene: 0, side: "impossible" };
-const OTHER = { impossible: "possible", possible: "impossible" };
-const OW = 760, OL = 44, OR = 12;
-
-function ochartSVG(sc) {
-  const T = sc.duration, W = OW, H = 250, L = OL, R = OR, Tp = 16, B = 46;
-  const sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
-  const vals = [...sel.windows, ...twin.windows].map(w => w.score);
-  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .12 || .02; lo -= pad; hi += pad;
-  const x = t => L + (t / T) * (W - L - R), y = v => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
-  const mono = 'font-family="IBM Plex Mono, monospace"', cx = w => x((w.start + Math.min(w.end, T)) / 2);
-  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Window scores of the possible and impossible videos">`;
-  if (sc.gt) {
-    g += `<rect x="${x(sc.gt[0])}" y="${Tp}" width="${x(sc.gt[1]) - x(sc.gt[0])}" height="${H - Tp - B}" fill="var(--viol-soft)"/>`;
-    for (const t of sc.gt) g += `<line x1="${x(t)}" x2="${x(t)}" y1="${Tp}" y2="${H - B}" stroke="var(--viol)" stroke-width="1" stroke-dasharray="3 3"/>`;
-  }
-  for (let k = 0; k <= 3; k++) {
-    const v = lo + (hi - lo) * k / 3;
-    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
-    g += `<text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="11" ${mono} fill="var(--muted)">${v.toFixed(2)}</text>`;
-  }
-  for (let t = 0; t <= Math.floor(T); t++)
-    g += `<text x="${x(t)}" y="${H - B + 30}" text-anchor="middle" font-size="11" ${mono} fill="var(--muted)">${t}s</text>`;
-  g += `<text x="${L}" y="${Tp - 4}" font-size="10.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">window score (PE-AV-Large)</text>`;
-  g += `<polyline points="${twin.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--faint)" stroke-width="1.6" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
-  twin.windows.forEach(w => g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="2.4" fill="var(--faint)"/>`);
-  g += `<polyline points="${sel.windows.map(w => `${cx(w)},${y(w.score)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
-  sel.windows.forEach((w, i) => {
-    let fill = "var(--accent)", r = 3.5;
-    if (sel.candidates.includes(i)) { fill = "var(--cand)"; r = 5; }
-    if (i === sel.lowest) { fill = "var(--viol)"; r = 6.5; }
-    g += `<circle cx="${cx(w)}" cy="${y(w.score)}" r="${r}" fill="${fill}" stroke="var(--surface)" stroke-width="1.3"/>`;
-    if (sel.picks.includes(i))
-      g += `<text x="${cx(w)}" y="${y(w.score) - 11}" text-anchor="middle" font-size="10.5" font-weight="600" ${mono} fill="var(--ink)">W${i + 1}</text>`;
-  });
-  g += `<line id="oplayhead" x1="${L}" x2="${L}" y1="${Tp}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" opacity=".5"/>`;
-  return g + "</svg>";
-}
-
-function otimeline(sc, side) {
-  // Only the annotated violation (GT) is drawn, and only under the Impossible video.
-  const T = sc.duration, gt = side === "impossible" ? sc.gt : null;
-  return (gt ? `<div class="band" style="left:${gt[0] / T * 100}%;width:${(gt[1] - gt[0]) / T * 100}%" title="annotated violation"></div>` : "") +
-    `<div class="head" style="left:0"></div>`;
-}
-
-function renderOrig() {
-  if (!ORIG) { $("orig").hidden = true; return; }
-  const sc = ORIG.scenes[ostate.scene], sel = sc.sides[ostate.side], twin = sc.sides[OTHER[ostate.side]];
-  $("otabs").innerHTML = ORIG.scenes.map((s, i) => `<button class="tab" role="tab" aria-selected="${i === ostate.scene}" data-oi="${i}">
-      <span class="attr">${s.attribute}</span><span class="ttl">${esc(s.title)}</span>
-      <span class="mins">min <b>${s.sides.impossible.min_score.toFixed(3)}</b> impossible · ${s.sides.possible.min_score.toFixed(3)} possible</span></button>`).join("");
-  for (const [id, side] of [["opos", "possible"], ["oimp", "impossible"]]) {
-    const v = $(id), src = sc.sides[side].video;
-    if (v.getAttribute("src") !== src) { v.setAttribute("src", src); v.play?.().catch(() => {}); }
-  }
-  $("opmin").textContent = `min ${sc.sides.possible.min_score.toFixed(3)}`;
-  $("oimin").textContent = `min ${sc.sides.impossible.min_score.toFixed(3)}`;
-  $("optl").innerHTML = otimeline(sc, "possible");
-  $("oitl").innerHTML = otimeline(sc, "impossible");
-  $("odesc").innerHTML = `${esc(sc.desc)}${sc.gt ? ` <b>Violation ${f2(sc.gt[0])}–${f2(sc.gt[1])} s.</b>` : ""} <span style="font-family:var(--f-mono);font-size:12px">${esc(sc.group)}</span>`;
-
-  for (const b of $("osideseg").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.side === ostate.side);
-  const label = ostate.side === "impossible" ? "Impossible" : "Possible";
-  $("odtitle").textContent = `${label} video, ${sc.attribute}`;
-  const lw = sel.windows[sel.lowest];
-  $("overdict").textContent = `lowest window W${sel.lowest + 1} (${f2(lw.start)}–${f2(Math.min(lw.end, sc.duration))} s, ${lw.score.toFixed(3)}) · ` +
-    `minimum ${sel.min_score.toFixed(3)} vs. ${twin.min_score.toFixed(3)} in the ${OTHER[ostate.side]} twin` +
-    (sc.gt ? ` · annotated violation ${f2(sc.gt[0])}–${f2(sc.gt[1])} s` : "");
-  $("olsel").textContent = `${ostate.side} video`;
-  $("oltwin").textContent = `${OTHER[ostate.side]} twin`;
-  $("ochart").innerHTML = ochartSVG(sc);
-  $("olgt").hidden = !sc.gt;
-  $("owindows").innerHTML = sel.picks.map(i => {
-    const w = sel.windows[i], isLo = i === sel.lowest, same = w.prediction.trim() === w.state.trim(), tw = twin.windows[i];
-    const end = Math.min(w.end, sc.duration), isIn = ostate.side === "impossible" && sc.gt && inGT(w, sc.gt);
-    const role = isLo ? `<span class="role lo">lowest</span>` : isIn ? `<span class="role gt">in violation</span>` : "";
-    return `<article class="wcard ${isIn ? "in" : ""} ${isLo ? "lo" : ""}">
-      <div class="clip"><video src="${sel.clips[i]}" muted loop autoplay playsinline preload="auto" aria-label="Window ${i + 1} clip"></video>
-        <span class="badge">W${i + 1} · ${f2(w.start)}–${f2(end)} s</span>${role}</div>
-      <div class="wmeta"><b>W${i + 1}</b><span class="score">score ${w.score.toFixed(3)}</span></div>
-      ${tw ? `<div class="twin">${OTHER[ostate.side]} twin, same window: ${tw.score.toFixed(3)}</div>` : ""}
-      <dl><div><dt>Prediction</dt><dd>${esc(w.prediction)}</dd></div>
-          <div><dt>State <em class="${same ? "" : "diff"}">${same ? "same as prediction" : "differs from prediction"}</em></dt><dd>${esc(w.state)}</dd></div></dl>
-    </article>`;
-  }).join("");
-  $("onote").textContent = `Original IntPhys2 videos (60 fps, ${sc.duration} s), shown here at 256 px and 30 fps. ` +
-    `Scores and sentences come from a single seed-42 run per pair (${sc.trial}). Qwen3-VL-8B-Thinking sees 60 frames per window. ` +
-    `The three lowest-scoring windows are highlighted. The annotated violation comes from IntPhys2-Timing. Window clips loop the exact 2 s span that was scored.`;
-}
-
-function tickOrig() {
-  if (!ORIG) return;
-  const a = $("opos"), b = $("oimp"), sc = ORIG.scenes[ostate.scene];
-  if (a.duration && b.duration && Math.abs(a.currentTime - b.currentTime) > 0.15) b.currentTime = a.currentTime;
-  if (a.duration) {
-    const frac = Math.min(1, a.currentTime / a.duration);
-    for (const h of document.querySelectorAll("#optl .head, #oitl .head")) h.style.left = `calc(${frac * 100}% - 1px)`;
-    const p = document.getElementById("oplayhead");
-    if (p) { const X = OL + frac * (OW - OL - OR); p.setAttribute("x1", X); p.setAttribute("x2", X); }
-  }
-}
-
-document.addEventListener("click", e => {
-  const tab = e.target.closest("[data-oi]"), side = e.target.closest("#osideseg button");
-  if (tab) { ostate.scene = +tab.dataset.oi; renderOrig(); }
-  if (side) { ostate.side = side.dataset.side; renderOrig(); }
-});
-renderOrig();
 </script>
